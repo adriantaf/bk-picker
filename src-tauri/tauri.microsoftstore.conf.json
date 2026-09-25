@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "bundle": {
+    "targets": ["nsis"],
+    "publisher": "Adrian Tafoya",
+    "shortDescription": "Screen and image color picker with design-system matches.",
+    "longDescription": "BK Picker captures colors from your screen or images, copies HEX/RGB/HSL/OKLCH, keeps history and favorites, builds simple palettes, and matches Tailwind, Material/Android, CSS named, and Bootstrap tokens. Made by Adrian Tafoya.",
+    "category": "Utility",
+    "windows": {
+      "webviewInstallMode": {
+        "type": "offlineInstaller"
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["English", "Spanish"]
+      }
+    }
+  }
+}
