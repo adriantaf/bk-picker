@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button, Center, Loader, Stack, Text } from "@mantine/core";
+import { Accordion, Button, Center, Loader, Stack, Text } from "@mantine/core";
 import { getVersion } from "@tauri-apps/api/app";
-import { ActiveColorPanel } from "@/features/color-picker";
+import { ActiveColorPanel, ImageColorPanel } from "@/features/color-picker";
 import { HistoryList } from "@/features/history";
 import { prependHistory, toggleFavorite } from "@/features/history/historyStore";
 import { OnboardingModal } from "@/features/onboarding";
@@ -73,7 +73,7 @@ function isEditableTarget(target: EventTarget | null): boolean {
 export function App() {
   const [boot, setBoot] = useState<BootState>("loading");
   const [bootTick, setBootTick] = useState(0);
-  const [tab, setTab] = useState<AppTab>("picker");
+  const [tab, setTab] = useState<AppTab>("color");
   const [pickerMode, setPickerMode] = useState<PickerMode>("manual");
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [activeColor, setActiveColor] = useState<Color>(DEFAULT_COLOR);
@@ -174,7 +174,7 @@ export function App() {
 
       setPicking(false);
       setLoupeSample(null);
-      setTab("picker");
+      setTab("color");
       setPickerMode("eyedropper");
       pushColor(color);
 
@@ -220,7 +220,7 @@ export function App() {
         return;
       }
       if (isEditableTarget(event.target)) return;
-      if (tab !== "picker" || picking) return;
+      if (tab !== "color" || picking) return;
       event.preventDefault();
       void copyFormatted(activeColor).catch(() =>
         notifyError(t(locale, "copy.failed")),
@@ -234,7 +234,7 @@ export function App() {
   useEffect(() => {
     async function onPaste(event: ClipboardEvent) {
       if (isEditableTarget(event.target)) return;
-      if (tab !== "picker" || pickerMode === "image") return;
+      if (tab === "image") return;
 
       const text = event.clipboardData?.getData("text")?.trim();
       if (!text) return;
@@ -252,7 +252,7 @@ export function App() {
 
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);
-  }, [copyFormatted, locale, pickerMode, pushColor, tab]);
+  }, [copyFormatted, locale, pushColor, tab]);
 
   async function persistSettings(next: AppSettings) {
     setSettings(next);
@@ -298,7 +298,7 @@ export function App() {
   }
 
   async function handleStartPick() {
-    setTab("picker");
+    setTab("color");
     setPickerMode("eyedropper");
     setPicking(true);
     try {
@@ -319,7 +319,6 @@ export function App() {
 
   async function handleSelectHistory(item: HistoryItem) {
     setActiveColor(item.color);
-    setTab("picker");
     try {
       await copyFormatted(item.color);
     } catch {
@@ -383,6 +382,7 @@ export function App() {
 
   function handleImagePick(color: Color) {
     pushColor(color);
+    setTab("color");
     void copyFormatted(color)
       .then(() => undefined)
       .catch(() => {
@@ -405,7 +405,6 @@ export function App() {
     const color = colorFromHex(hex);
     if (!color) return;
     pushColor(color);
-    setTab("picker");
     try {
       await copyFormatted(color);
     } catch {
@@ -435,6 +434,25 @@ export function App() {
       hsl: t(locale, "format.hsl"),
       hslModern: t(locale, "format.hslModern"),
       oklch: t(locale, "format.oklch"),
+    }),
+    [locale],
+  );
+
+  const imageLabels = useMemo(
+    () => ({
+      chooseFile: t(locale, "image.chooseFile"),
+      urlPlaceholder: t(locale, "image.urlPlaceholder"),
+      loadUrl: t(locale, "image.loadUrl"),
+      hint: t(locale, "image.hint"),
+      dropHint: t(locale, "image.dropHint"),
+      pasteHint: t(locale, "image.pasteHint"),
+      fileLabel: t(locale, "image.fileLabel"),
+      loading: t(locale, "image.loading"),
+      errorInvalid: t(locale, "image.errorInvalid"),
+      errorNetwork: t(locale, "image.errorNetwork"),
+      zoomIn: t(locale, "image.zoomIn"),
+      zoomOut: t(locale, "image.zoomOut"),
+      zoomFit: t(locale, "image.zoomFit"),
     }),
     [locale],
   );
@@ -483,197 +501,202 @@ export function App() {
           cta: t(locale, "onboarding.cta"),
         }}
       />
-    <AppShell
-      brandTitle={t(locale, "app.title")}
-      tabs={
-        <TabBar
-          value={tab}
-          onChange={setTab}
-          labels={{
-            picker: t(locale, "tab.picker"),
-            history: t(locale, "tab.history"),
-            palettes: t(locale, "tab.palettes"),
-            systems: t(locale, "tab.systems"),
-            settings: t(locale, "tab.settings"),
-          }}
-        />
-      }
-      footer={
-        tab === "picker" ? (
-          <ShortcutBanner
-            label={t(locale, "shortcut.label")}
-            statusText={shortcutStatusText}
-            isError={Boolean(shortcutError)}
+      <AppShell
+        tabs={
+          <TabBar
+            value={tab}
+            onChange={(next) => {
+              if (picking && next !== "color") void handleStopPick();
+              setTab(next);
+            }}
+            labels={{
+              color: t(locale, "tab.color"),
+              image: t(locale, "tab.image"),
+              settings: t(locale, "tab.settings"),
+            }}
           />
-        ) : null
-      }
-    >
-      {tab === "picker" ? (
-        <ActiveColorPanel
-          title={t(locale, "active.title")}
-          hint={t(locale, "active.hint")}
-          color={activeColor}
-          formattedValue={formatColor(activeColor, settings.copyFormat)}
-          copyFormat={settings.copyFormat}
-          formatLabels={formatLabels}
-          copyLabel={t(locale, "copy.label")}
-          copiedLabel={t(locale, "copy.copied")}
-          failedLabel={t(locale, "copy.failed")}
-          hexLabel={t(locale, "hex.label")}
-          hexInvalidLabel={t(locale, "hex.invalid")}
-          saturationLabel={t(locale, "picker.saturation")}
-          hueLabel={t(locale, "picker.hue")}
-          pickLabel={t(locale, "pick.start")}
-          pickActiveLabel={t(locale, "pick.active")}
-          pickHint={t(locale, "pick.hint")}
-          pickCancelLabel={t(locale, "pick.cancel")}
-          loupeCenterLabel={t(locale, "loupe.center")}
-          contrastLabels={{
-            title: t(locale, "contrast.title"),
-            onWhite: t(locale, "contrast.onWhite"),
-            onBlack: t(locale, "contrast.onBlack"),
-            pass: t(locale, "contrast.pass"),
-            fail: t(locale, "contrast.fail"),
-          }}
-          mode={pickerMode}
-          onModeChange={handleModeChange}
-          modeLabels={{
-            eyedropper: t(locale, "mode.eyedropper"),
-            manual: t(locale, "mode.manual"),
-            image: t(locale, "mode.image"),
-          }}
-          imageLabels={{
-            chooseFile: t(locale, "image.chooseFile"),
-            urlPlaceholder: t(locale, "image.urlPlaceholder"),
-            loadUrl: t(locale, "image.loadUrl"),
-            hint: t(locale, "image.hint"),
-            dropHint: t(locale, "image.dropHint"),
-            pasteHint: t(locale, "image.pasteHint"),
-            fileLabel: t(locale, "image.fileLabel"),
-            loading: t(locale, "image.loading"),
-            errorInvalid: t(locale, "image.errorInvalid"),
-            errorNetwork: t(locale, "image.errorNetwork"),
-            zoomIn: t(locale, "image.zoomIn"),
-            zoomOut: t(locale, "image.zoomOut"),
-            zoomFit: t(locale, "image.zoomFit"),
-          }}
-          picking={picking}
-          loupeSample={loupeSample}
-          onColorChange={setActiveColor}
-          onImagePick={handleImagePick}
-          onFormatChange={(format) => void handleFormatChange(format)}
-          onCopy={handleCopy}
-          onCopyError={() => notifyError(t(locale, "copy.failed"))}
-          onStartPick={() => void handleStartPick()}
-          onStopPick={() => void handleStopPick()}
-        />
-      ) : null}
+        }
+        footer={
+          tab === "color" ? (
+            <ShortcutBanner
+              label={t(locale, "shortcut.label")}
+              statusText={shortcutStatusText}
+              isError={Boolean(shortcutError)}
+            />
+          ) : null
+        }
+      >
+        {tab === "color" ? (
+          <ActiveColorPanel
+            selectedLabel={t(locale, "active.selected")}
+            color={activeColor}
+            formattedValue={formatColor(activeColor, settings.copyFormat)}
+            copyFormat={settings.copyFormat}
+            formatLabels={formatLabels}
+            copyLabel={t(locale, "copy.label")}
+            copiedLabel={t(locale, "copy.copied")}
+            failedLabel={t(locale, "copy.failed")}
+            hexLabel={t(locale, "hex.label")}
+            hexInvalidLabel={t(locale, "hex.invalid")}
+            saturationLabel={t(locale, "picker.saturation")}
+            hueLabel={t(locale, "picker.hue")}
+            pickLabel={t(locale, "pick.start")}
+            pickActiveLabel={t(locale, "pick.active")}
+            pickHint={t(locale, "pick.hint")}
+            pickCancelLabel={t(locale, "pick.cancel")}
+            loupeCenterLabel={t(locale, "loupe.center")}
+            valueLabel={t(locale, "active.value")}
+            formatLabel={t(locale, "active.format")}
+            contrastLabels={{
+              title: t(locale, "contrast.title"),
+              onWhite: t(locale, "contrast.onWhite"),
+              onBlack: t(locale, "contrast.onBlack"),
+              pass: t(locale, "contrast.pass"),
+              fail: t(locale, "contrast.fail"),
+            }}
+            mode={pickerMode}
+            onModeChange={handleModeChange}
+            modeLabels={{
+              eyedropper: t(locale, "mode.eyedropper"),
+              manual: t(locale, "mode.manual"),
+            }}
+            picking={picking}
+            loupeSample={loupeSample}
+            onColorChange={setActiveColor}
+            onFormatChange={(format) => void handleFormatChange(format)}
+            onCopy={handleCopy}
+            onCopyError={() => notifyError(t(locale, "copy.failed"))}
+            onStartPick={() => void handleStartPick()}
+            onStopPick={() => void handleStopPick()}
+          >
+            <Accordion
+              multiple
+              defaultValue={["history"]}
+              variant="separated"
+              radius="md"
+              mt="sm"
+            >
+              <Accordion.Item value="history">
+                <Accordion.Control>{t(locale, "tab.history")}</Accordion.Control>
+                <Accordion.Panel>
+                  <HistoryList
+                    title={t(locale, "history.title")}
+                    favoritesTitle={t(locale, "history.favorites")}
+                    emptyTitle={t(locale, "history.empty")}
+                    favoriteLabel={t(locale, "history.favorite")}
+                    searchPlaceholder={t(locale, "history.search")}
+                    clearLabel={t(locale, "history.clear")}
+                    exportCssLabel={t(locale, "history.exportCss")}
+                    exportJsonLabel={t(locale, "history.exportJson")}
+                    items={history}
+                    activeHex={activeColor.hex}
+                    onSelect={(item) => void handleSelectHistory(item)}
+                    onToggleFavorite={handleToggleFavorite}
+                    onClear={handleClearHistory}
+                    onExportCss={() => void handleExportHistoryCss()}
+                    onExportJson={() => void handleExportHistoryJson()}
+                  />
+                </Accordion.Panel>
+              </Accordion.Item>
+              <Accordion.Item value="systems">
+                <Accordion.Control>{t(locale, "tab.systems")}</Accordion.Control>
+                <Accordion.Panel>
+                  <SystemsPanel
+                    color={activeColor}
+                    embedded
+                    onCopyToken={(token) => void handleCopySystemToken(token)}
+                    onCopyBoth={(token, hex) =>
+                      void handleCopySystemBoth(token, hex)
+                    }
+                    onSelect={(hex) => void handleSelectSystemHex(hex)}
+                    labels={{
+                      title: t(locale, "systems.title"),
+                      hint: t(locale, "systems.hint"),
+                      nearest: t(locale, "systems.nearest"),
+                      exact: t(locale, "systems.exact"),
+                      copyToken: t(locale, "systems.copyToken"),
+                      copyBoth: t(locale, "systems.copyBoth"),
+                      delta: t(locale, "systems.delta"),
+                      search: t(locale, "systems.search"),
+                      filterAll: t(locale, "systems.filterAll"),
+                      systemLabels: {
+                        tailwind: t(locale, "systems.tailwind"),
+                        material: t(locale, "systems.material"),
+                        css: t(locale, "systems.css"),
+                        bootstrap: t(locale, "systems.bootstrap"),
+                      },
+                    }}
+                  />
+                </Accordion.Panel>
+              </Accordion.Item>
+              <Accordion.Item value="palettes">
+                <Accordion.Control>{t(locale, "tab.palettes")}</Accordion.Control>
+                <Accordion.Panel>
+                  <PalettePanel
+                    color={activeColor}
+                    copyFormat={settings.copyFormat}
+                    onSelect={(color) => {
+                      setActiveColor(color);
+                      void copyFormatted(color).catch(() =>
+                        notifyError(t(locale, "copy.failed")),
+                      );
+                    }}
+                    onCopyColor={handleCopyPaletteColor}
+                    onExport={handleExportPalette}
+                    labels={{
+                      complementary: t(locale, "palette.complementary"),
+                      complementaryHint: t(locale, "palette.complementaryHint"),
+                      analogous: t(locale, "palette.analogous"),
+                      analogousHint: t(locale, "palette.analogousHint"),
+                      triadic: t(locale, "palette.triadic"),
+                      triadicHint: t(locale, "palette.triadicHint"),
+                      export: t(locale, "palette.export"),
+                      clickHint: t(locale, "palette.clickHint"),
+                    }}
+                  />
+                </Accordion.Panel>
+              </Accordion.Item>
+            </Accordion>
+          </ActiveColorPanel>
+        ) : null}
 
-      {tab === "history" ? (
-        <HistoryList
-          title={t(locale, "history.title")}
-          favoritesTitle={t(locale, "history.favorites")}
-          emptyTitle={t(locale, "history.empty")}
-          favoriteLabel={t(locale, "history.favorite")}
-          searchPlaceholder={t(locale, "history.search")}
-          clearLabel={t(locale, "history.clear")}
-          exportCssLabel={t(locale, "history.exportCss")}
-          exportJsonLabel={t(locale, "history.exportJson")}
-          items={history}
-          activeHex={activeColor.hex}
-          onSelect={(item) => void handleSelectHistory(item)}
-          onToggleFavorite={handleToggleFavorite}
-          onClear={handleClearHistory}
-          onExportCss={() => void handleExportHistoryCss()}
-          onExportJson={() => void handleExportHistoryJson()}
-        />
-      ) : null}
+        {tab === "image" ? (
+          <ImageColorPanel onPick={handleImagePick} labels={imageLabels} />
+        ) : null}
 
-      {tab === "palettes" ? (
-        <PalettePanel
-          color={activeColor}
-          copyFormat={settings.copyFormat}
-          onSelect={(color) => {
-            setActiveColor(color);
-            void copyFormatted(color).catch(() =>
-              notifyError(t(locale, "copy.failed")),
-            );
-          }}
-          onCopyColor={handleCopyPaletteColor}
-          onExport={handleExportPalette}
-          labels={{
-            complementary: t(locale, "palette.complementary"),
-            complementaryHint: t(locale, "palette.complementaryHint"),
-            analogous: t(locale, "palette.analogous"),
-            analogousHint: t(locale, "palette.analogousHint"),
-            triadic: t(locale, "palette.triadic"),
-            triadicHint: t(locale, "palette.triadicHint"),
-            export: t(locale, "palette.export"),
-            clickHint: t(locale, "palette.clickHint"),
-          }}
-        />
-      ) : null}
-
-      {tab === "systems" ? (
-        <SystemsPanel
-          color={activeColor}
-          onCopyToken={(token) => void handleCopySystemToken(token)}
-          onCopyBoth={(token, hex) => void handleCopySystemBoth(token, hex)}
-          onSelect={(hex) => void handleSelectSystemHex(hex)}
-          labels={{
-            title: t(locale, "systems.title"),
-            hint: t(locale, "systems.hint"),
-            nearest: t(locale, "systems.nearest"),
-            exact: t(locale, "systems.exact"),
-            copyToken: t(locale, "systems.copyToken"),
-            copyBoth: t(locale, "systems.copyBoth"),
-            delta: t(locale, "systems.delta"),
-            search: t(locale, "systems.search"),
-            filterAll: t(locale, "systems.filterAll"),
-            systemLabels: {
-              tailwind: t(locale, "systems.tailwind"),
-              material: t(locale, "systems.material"),
-              css: t(locale, "systems.css"),
-              bootstrap: t(locale, "systems.bootstrap"),
-            },
-          }}
-        />
-      ) : null}
-
-      {tab === "settings" ? (
-        <SettingsPanel
-          locale={locale}
-          shortcut={settings.shortcut}
-          shortcutStatusText={shortcutStatusText}
-          shortcutIsError={Boolean(shortcutError)}
-          alwaysOnTop={settings.alwaysOnTop}
-          version={appVersion}
-          onLocaleChange={(next) => void handleLocaleChange(next)}
-          onShortcutChange={(next) => void handleShortcutChange(next)}
-          onAlwaysOnTopChange={(next) => void handleAlwaysOnTopChange(next)}
-          onOpenExternal={(url) => {
-            void openExternalUrl(url).catch(() =>
-              notifyError(t(locale, "status.error")),
-            );
-          }}
-          labels={{
-            language: t(locale, "settings.language"),
-            languageHint: t(locale, "settings.languageHint"),
-            languageToggle: t(locale, "language.label"),
-            languageEs: t(locale, "language.es"),
-            languageEn: t(locale, "language.en"),
-            shortcut: t(locale, "settings.shortcut"),
-            shortcutHint: t(locale, "settings.shortcutHint"),
-            alwaysOnTop: t(locale, "settings.alwaysOnTop"),
-            alwaysOnTopHint: t(locale, "settings.alwaysOnTopHint"),
-            about: t(locale, "settings.about"),
-            aboutBody: t(locale, "settings.aboutBody"),
-            creator: t(locale, "settings.creator"),
-            version: t(locale, "settings.version"),
-          }}
-        />
-      ) : null}
-    </AppShell>
+        {tab === "settings" ? (
+          <SettingsPanel
+            locale={locale}
+            shortcut={settings.shortcut}
+            shortcutStatusText={shortcutStatusText}
+            shortcutIsError={Boolean(shortcutError)}
+            alwaysOnTop={settings.alwaysOnTop}
+            version={appVersion}
+            onLocaleChange={(next) => void handleLocaleChange(next)}
+            onShortcutChange={(next) => void handleShortcutChange(next)}
+            onAlwaysOnTopChange={(next) => void handleAlwaysOnTopChange(next)}
+            onOpenExternal={(url) => {
+              void openExternalUrl(url).catch(() =>
+                notifyError(t(locale, "status.error")),
+              );
+            }}
+            labels={{
+              language: t(locale, "settings.language"),
+              languageHint: t(locale, "settings.languageHint"),
+              languageToggle: t(locale, "language.label"),
+              languageEs: t(locale, "language.es"),
+              languageEn: t(locale, "language.en"),
+              shortcut: t(locale, "settings.shortcut"),
+              shortcutHint: t(locale, "settings.shortcutHint"),
+              alwaysOnTop: t(locale, "settings.alwaysOnTop"),
+              alwaysOnTopHint: t(locale, "settings.alwaysOnTopHint"),
+              about: t(locale, "settings.about"),
+              creator: t(locale, "settings.creator"),
+              version: t(locale, "settings.version"),
+            }}
+          />
+        ) : null}
+      </AppShell>
     </>
   );
 }

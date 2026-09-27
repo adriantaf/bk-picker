@@ -13,78 +13,59 @@ type ContrastPanelProps = {
   };
 };
 
-function levelColor(level: ContrastLevel): string {
-  if (level === "AAA") return "teal";
-  if (level === "AA") return "blue";
-  return "red";
-}
-
-function levelLabel(level: ContrastLevel, pass: string, fail: string): string {
-  if (level === "fail") return fail;
-  return `${pass} ${level}`;
+function levelOk(level: ContrastLevel): boolean {
+  return level === "AA" || level === "AAA";
 }
 
 export function ContrastPanel({ color, labels }: ContrastPanelProps) {
   const report = contrastReport(color);
+  const best = report.onWhite >= report.onBlack ? report.levelWhite : report.levelBlack;
+  const aa = levelOk(report.levelWhite) || levelOk(report.levelBlack);
+  const aaa = report.levelWhite === "AAA" || report.levelBlack === "AAA";
 
   return (
-    <Paper p="sm" withBorder bg="gray.0">
-      <Stack gap={8}>
-        <Text size="xs" fw={600}>
+    <Paper
+      p="md"
+      radius="lg"
+      style={{
+        background: "var(--color-elevated)",
+        border: "none",
+        boxShadow: "none",
+      }}
+    >
+      <Stack gap={10}>
+        <Text
+          size="xs"
+          c="dimmed"
+          tt="uppercase"
+          fw={600}
+          style={{ letterSpacing: "0.06em" }}
+        >
           {labels.title}
         </Text>
-        <Group justify="space-between" gap="xs" wrap="wrap">
-          <Group gap={6}>
-            <Text size="xs" c="dimmed">
-              {labels.onWhite}
-            </Text>
-            <Text size="xs" ff="monospace" fw={600}>
-              {report.onWhite.toFixed(2)}:1
-            </Text>
-            <Badge size="xs" color={levelColor(report.levelWhite)} variant="light">
-              {levelLabel(report.levelWhite, labels.pass, labels.fail)}
-            </Badge>
-          </Group>
-          <Group gap={6}>
-            <Text size="xs" c="dimmed">
-              {labels.onBlack}
-            </Text>
-            <Text size="xs" ff="monospace" fw={600}>
-              {report.onBlack.toFixed(2)}:1
-            </Text>
-            <Badge size="xs" color={levelColor(report.levelBlack)} variant="light">
-              {levelLabel(report.levelBlack, labels.pass, labels.fail)}
-            </Badge>
-          </Group>
-        </Group>
-        <Group gap="xs" grow>
-          <Paper
-            p={6}
-            radius="sm"
-            style={{
-              background: "#fff",
-              color: color.hex,
-              textAlign: "center",
-              fontSize: 11,
-              fontWeight: 600,
-              border: "1px solid rgb(0 0 0 / 0.08)",
-            }}
+        <Group gap="sm" wrap="wrap">
+          <Badge
+            size="lg"
+            radius="xl"
+            color={aa ? "teal" : "red"}
+            variant="filled"
+            leftSection={aa ? "✓" : "×"}
           >
-            Aa
-          </Paper>
-          <Paper
-            p={6}
-            radius="sm"
-            style={{
-              background: "#111",
-              color: color.hex,
-              textAlign: "center",
-              fontSize: 11,
-              fontWeight: 600,
-            }}
+            {aa ? `${labels.pass} AA` : `${labels.fail} AA`}
+          </Badge>
+          <Badge
+            size="lg"
+            radius="xl"
+            color={aaa ? "teal" : "gray"}
+            variant={aaa ? "filled" : "light"}
+            leftSection={aaa ? "✓" : "×"}
           >
-            Aa
-          </Paper>
+            {aaa ? `${labels.pass} AAA` : `${labels.fail} AAA`}
+          </Badge>
+          <Text size="xs" c="dimmed" ff="monospace">
+            {labels.onWhite} {report.onWhite.toFixed(1)} · {labels.onBlack}{" "}
+            {report.onBlack.toFixed(1)} · {best}
+          </Text>
         </Group>
       </Stack>
     </Paper>

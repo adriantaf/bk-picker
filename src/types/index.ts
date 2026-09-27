@@ -35,9 +35,9 @@ export type PaletteType = "complementary" | "analogous" | "triadic";
 
 export type Locale = "es" | "en";
 
-export type AppTab = "picker" | "history" | "palettes" | "systems" | "settings";
+export type AppTab = "color" | "image" | "settings";
 
-export type PickerMode = "eyedropper" | "manual" | "image";
+export type PickerMode = "eyedropper" | "manual";
 
 export type HistoryItem = {
   id: string;

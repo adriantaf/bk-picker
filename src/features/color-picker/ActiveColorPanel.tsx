@@ -1,24 +1,23 @@
 import {
   Box,
   Button,
-  Code,
   Group,
-  Paper,
-  SegmentedControl,
   Stack,
   Text,
+  TextInput,
+  UnstyledButton,
 } from "@mantine/core";
-import { ColorSwatch, CopyButton, FormatSelector } from "@/ui";
+import type { ReactNode } from "react";
+import { CopyButton, FormatSelector } from "@/ui";
+import { contrastingInk } from "@/lib/color";
 import type { Color, ColorFormat, LoupeUpdate, PickerMode } from "@/types";
 import { ContrastPanel } from "./ContrastPanel";
 import { HexInput } from "./HexInput";
 import { HsbPicker } from "./HsbPicker";
-import { ImageColorPanel } from "./ImageColorPanel";
 import { LoupeCanvas } from "./LoupeCanvas";
 
 type ActiveColorPanelProps = {
-  title: string;
-  hint: string;
+  selectedLabel: string;
   color: Color;
   formattedValue: string;
   copyFormat: ColorFormat;
@@ -35,6 +34,8 @@ type ActiveColorPanelProps = {
   pickHint: string;
   pickCancelLabel: string;
   loupeCenterLabel: string;
+  valueLabel: string;
+  formatLabel: string;
   contrastLabels: {
     title: string;
     onWhite: string;
@@ -45,35 +46,19 @@ type ActiveColorPanelProps = {
   mode: PickerMode;
   onModeChange: (mode: PickerMode) => void;
   modeLabels: Record<PickerMode, string>;
-  imageLabels: {
-    chooseFile: string;
-    urlPlaceholder: string;
-    loadUrl: string;
-    hint: string;
-    dropHint: string;
-    pasteHint: string;
-    loading: string;
-    errorInvalid: string;
-    errorNetwork: string;
-    zoomIn: string;
-    zoomOut: string;
-    zoomFit: string;
-    fileLabel: string;
-  };
   picking: boolean;
   loupeSample: LoupeUpdate | null;
   onColorChange: (color: Color) => void;
-  onImagePick: (color: Color) => void;
   onFormatChange: (format: ColorFormat) => void;
   onCopy: () => Promise<void>;
   onCopyError: () => void;
   onStartPick: () => void;
   onStopPick: () => void;
+  children?: ReactNode;
 };
 
 export function ActiveColorPanel({
-  title,
-  hint,
+  selectedLabel,
   color,
   formattedValue,
   copyFormat,
@@ -90,145 +75,173 @@ export function ActiveColorPanel({
   pickHint,
   pickCancelLabel,
   loupeCenterLabel,
+  valueLabel,
+  formatLabel,
   contrastLabels,
   mode,
   onModeChange,
   modeLabels,
-  imageLabels,
   picking,
   loupeSample,
   onColorChange,
-  onImagePick,
   onFormatChange,
   onCopy,
   onCopyError,
   onStartPick,
   onStopPick,
+  children,
 }: ActiveColorPanelProps) {
+  const ink = contrastingInk(color);
+
   return (
-    <Paper p="md" component="section" className="ui-fade">
-      <Stack gap="md">
-        <Group justify="space-between" align="flex-start" wrap="nowrap" gap="sm">
-          <Box style={{ minWidth: 0, flex: 1 }}>
-            <Text size="sm" fw={600}>
-              {title}
-            </Text>
-            <Text size="xs" c="dimmed" mt={2}>
-              {hint}
-            </Text>
-          </Box>
-          <ColorSwatch color={color} size="md" label={color.hex} />
-        </Group>
+    <Stack gap="lg" className="ui-fade">
+      <Stack gap={6}>
+        <Text
+          size="xs"
+          c="dimmed"
+          tt="uppercase"
+          fw={600}
+          style={{ letterSpacing: "0.06em" }}
+        >
+          {selectedLabel}
+        </Text>
+        <Box
+          style={{
+            height: 120,
+            borderRadius: 16,
+            background: color.hex,
+            display: "grid",
+            placeItems: "center",
+            boxShadow: "inset 0 0 0 1px rgb(0 0 0 / 0.06)",
+          }}
+        >
+          <Text
+            ff="monospace"
+            fw={700}
+            size="xl"
+            style={{ color: ink, letterSpacing: "0.04em" }}
+          >
+            {color.hex}
+          </Text>
+        </Box>
+      </Stack>
 
-        <SegmentedControl
-          fullWidth
-          value={mode}
-          onChange={(value) => onModeChange(value as PickerMode)}
-          data={[
-            { value: "eyedropper", label: modeLabels.eyedropper },
-            { value: "manual", label: modeLabels.manual },
-            { value: "image", label: modeLabels.image },
-          ]}
-        />
+      <Group gap="xs" grow>
+        {(["eyedropper", "manual"] as const).map((m) => {
+          const active = mode === m;
+          return (
+            <UnstyledButton
+              key={m}
+              onClick={() => onModeChange(m)}
+              style={{
+                padding: "10px 12px",
+                borderRadius: 12,
+                textAlign: "center",
+                fontSize: 13,
+                fontWeight: 600,
+                color: active ? "var(--mantine-color-blue-6)" : "var(--color-muted)",
+                background: active ? "var(--color-surface)" : "var(--color-elevated)",
+                border: active
+                  ? "1px solid var(--color-border)"
+                  : "1px solid transparent",
+                boxShadow: active ? "0 1px 2px rgb(0 0 0 / 0.04)" : "none",
+              }}
+            >
+              {modeLabels[m]}
+            </UnstyledButton>
+          );
+        })}
+      </Group>
 
-        {mode === "eyedropper" ? (
-          <Stack gap="sm" className="ui-fade">
-            <Group gap="xs" wrap="wrap" grow>
-              <Button
-                onClick={() => (picking ? onStopPick() : onStartPick())}
-                color={picking ? "orange" : "blue"}
-                variant={picking ? "light" : "filled"}
-                style={{ flex: "1 1 140px" }}
-              >
-                {picking ? pickActiveLabel : pickLabel}
-              </Button>
-              {picking ? (
-                <Button
-                  variant="default"
-                  onClick={onStopPick}
-                  style={{ flex: "0 0 auto" }}
-                >
-                  {pickCancelLabel}
-                </Button>
-              ) : null}
-            </Group>
-
+      {mode === "eyedropper" ? (
+        <Stack gap="sm">
+          <Group gap="xs" wrap="wrap" grow>
+            <Button
+              onClick={() => (picking ? onStopPick() : onStartPick())}
+              color={picking ? "orange" : "blue"}
+              variant={picking ? "light" : "filled"}
+              radius="md"
+              style={{ flex: "1 1 140px" }}
+            >
+              {picking ? pickActiveLabel : pickLabel}
+            </Button>
             {picking ? (
-              <Paper p="sm" bg="gray.0" withBorder>
-                <Stack gap="sm">
-                  <Text size="xs" c="dimmed" ta="center">
-                    {pickHint}
-                  </Text>
-                  <LoupeCanvas sample={loupeSample} centerLabel={loupeCenterLabel} />
-                  <Text
-                    ta="center"
-                    ff="monospace"
-                    size="lg"
-                    fw={600}
-                    style={{ letterSpacing: "0.04em" }}
-                  >
-                    {loupeSample?.hex ?? "—"}
-                  </Text>
-                </Stack>
-              </Paper>
+              <Button variant="default" radius="md" onClick={onStopPick}>
+                {pickCancelLabel}
+              </Button>
             ) : null}
-          </Stack>
-        ) : null}
+          </Group>
+          {picking ? (
+            <Stack gap="sm">
+              <Text size="xs" c="dimmed" ta="center">
+                {pickHint}
+              </Text>
+              <LoupeCanvas sample={loupeSample} centerLabel={loupeCenterLabel} />
+              <Text ta="center" ff="monospace" size="lg" fw={600}>
+                {loupeSample?.hex ?? "—"}
+              </Text>
+            </Stack>
+          ) : null}
+        </Stack>
+      ) : null}
 
-        {mode === "manual" ? (
-          <Box className="ui-fade">
-            <HsbPicker
-              color={color}
-              onChange={onColorChange}
-              saturationLabel={saturationLabel}
-              hueLabel={hueLabel}
-            />
-          </Box>
-        ) : null}
+      {mode === "manual" ? (
+        <HsbPicker
+          color={color}
+          onChange={onColorChange}
+          saturationLabel={saturationLabel}
+          hueLabel={hueLabel}
+        />
+      ) : null}
 
-        {mode === "image" ? (
-          <ImageColorPanel onPick={onImagePick} labels={imageLabels} />
-        ) : null}
+      <Stack gap={6}>
+        <Text size="xs" c="dimmed" fw={600}>
+          {valueLabel}
+        </Text>
+        <TextInput
+          value={formattedValue}
+          readOnly
+          radius="md"
+          styles={{
+            input: {
+              fontFamily: "var(--font-mono)",
+              fontSize: 13,
+            },
+          }}
+        />
+      </Stack>
 
-        <Group justify="space-between" align="flex-end" gap="sm" wrap="wrap">
+      <Group align="flex-end" gap="sm" wrap="wrap">
+        <Box style={{ flex: "1 1 120px", minWidth: 0 }}>
+          <Text size="xs" c="dimmed" fw={600} mb={6}>
+            {formatLabel}
+          </Text>
           <FormatSelector
             value={copyFormat}
             onChange={onFormatChange}
             labels={formatLabels}
           />
-          <CopyButton
-            label={copyLabel}
-            copiedLabel={copiedLabel}
-            failedLabel={failedLabel}
-            onCopy={onCopy}
-            onError={onCopyError}
-            compact
-          />
-        </Group>
-
-        <Paper p="sm" bg="gray.0" withBorder>
-          <Code
-            block
-            style={{
-              background: "transparent",
-              fontSize: 14,
-              userSelect: "text",
-              wordBreak: "break-all",
-            }}
-          >
-            {formattedValue}
-          </Code>
-        </Paper>
-
-        <ContrastPanel color={color} labels={contrastLabels} />
-
-        <HexInput
-          color={color}
-          label={hexLabel}
-          invalidLabel={hexInvalidLabel}
-          onChange={onColorChange}
+        </Box>
+        <CopyButton
+          label={copyLabel}
+          copiedLabel={copiedLabel}
+          failedLabel={failedLabel}
+          onCopy={onCopy}
+          onError={onCopyError}
+          compact
         />
-      </Stack>
-    </Paper>
+      </Group>
+
+      <ContrastPanel color={color} labels={contrastLabels} />
+
+      <HexInput
+        color={color}
+        label={hexLabel}
+        invalidLabel={hexInvalidLabel}
+        onChange={onColorChange}
+      />
+
+      {children}
+    </Stack>
   );
 }

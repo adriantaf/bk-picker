@@ -8,6 +8,7 @@ import {
   Switch,
   Text,
 } from "@mantine/core";
+import type { ReactNode } from "react";
 import { LanguageToggle } from "@/ui";
 import { APP_CREATOR, SHORTCUT_PRESETS } from "@/lib/constants";
 import type { Locale } from "@/types";
@@ -34,11 +35,41 @@ type SettingsPanelProps = {
     alwaysOnTop: string;
     alwaysOnTopHint: string;
     about: string;
-    aboutBody: string;
     creator: string;
     version: string;
   };
 };
+
+function SettingsRow({
+  title,
+  hint,
+  control,
+}: {
+  title: string;
+  hint: string;
+  control: ReactNode;
+}) {
+  return (
+    <Group
+      justify="space-between"
+      align="center"
+      wrap="nowrap"
+      gap="md"
+      py="md"
+      style={{ borderBottom: "1px solid var(--color-hairline)" }}
+    >
+      <Box style={{ minWidth: 0, flex: 1 }}>
+        <Text size="sm" fw={600}>
+          {title}
+        </Text>
+        <Text size="xs" c="dimmed" mt={2}>
+          {hint}
+        </Text>
+      </Box>
+      <Box style={{ flexShrink: 0 }}>{control}</Box>
+    </Group>
+  );
+}
 
 export function SettingsPanel({
   locale,
@@ -54,36 +85,27 @@ export function SettingsPanel({
   labels,
 }: SettingsPanelProps) {
   return (
-    <Stack gap="md" className="ui-fade">
-      <Paper p="md">
-        <Stack gap="sm">
-          <Box>
-            <Text size="sm" fw={600}>
-              {labels.language}
-            </Text>
-            <Text size="xs" c="dimmed" mt={2}>
-              {labels.languageHint}
-            </Text>
-          </Box>
-          <LanguageToggle
-            locale={locale}
-            onChange={onLocaleChange}
-            label={labels.languageToggle}
-            labels={{ es: labels.languageEs, en: labels.languageEn }}
-          />
-        </Stack>
-      </Paper>
-
-      <Paper p="md">
-        <Stack gap="sm">
-          <Box>
-            <Text size="sm" fw={600}>
-              {labels.shortcut}
-            </Text>
-            <Text size="xs" c="dimmed" mt={2}>
-              {labels.shortcutHint}
-            </Text>
-          </Box>
+    <Stack gap="lg" className="ui-fade">
+      <Paper p="md" radius="lg" withBorder={false} shadow="none" bg="var(--color-surface)">
+        <SettingsRow
+          title={labels.language}
+          hint={labels.languageHint}
+          control={
+            <LanguageToggle
+              locale={locale}
+              onChange={onLocaleChange}
+              label={labels.languageToggle}
+              labels={{ es: labels.languageEs, en: labels.languageEn }}
+            />
+          }
+        />
+        <Box py="md" style={{ borderBottom: "1px solid var(--color-hairline)" }}>
+          <Text size="sm" fw={600}>
+            {labels.shortcut}
+          </Text>
+          <Text size="xs" c="dimmed" mt={2} mb="sm">
+            {labels.shortcutHint}
+          </Text>
           <SegmentedControl
             value={shortcut}
             onChange={onShortcutChange}
@@ -92,70 +114,59 @@ export function SettingsPanel({
               label: preset,
             }))}
             fullWidth
-            orientation="horizontal"
+            radius="md"
             styles={{
-              root: { flexWrap: "wrap" },
               label: { whiteSpace: "nowrap", fontSize: 11 },
             }}
           />
           <Text
             size="xs"
             c={shortcutIsError ? "red" : "dimmed"}
+            mt="xs"
             role={shortcutIsError ? "alert" : undefined}
-            aria-live={shortcutIsError ? "polite" : undefined}
           >
             {shortcutStatusText}
           </Text>
-        </Stack>
+        </Box>
+        <SettingsRow
+          title={labels.alwaysOnTop}
+          hint={labels.alwaysOnTopHint}
+          control={
+            <Switch
+              checked={alwaysOnTop}
+              onChange={(event) =>
+                onAlwaysOnTopChange(event.currentTarget.checked)
+              }
+              size="md"
+              aria-label={labels.alwaysOnTop}
+            />
+          }
+        />
       </Paper>
 
-      <Paper p="md">
-        <Group justify="space-between" align="flex-start" wrap="nowrap" gap="md">
-          <Box style={{ minWidth: 0, flex: 1 }}>
-            <Text size="sm" fw={600}>
-              {labels.alwaysOnTop}
-            </Text>
-            <Text size="xs" c="dimmed" mt={2}>
-              {labels.alwaysOnTopHint}
-            </Text>
-          </Box>
-          <Switch
-            checked={alwaysOnTop}
-            onChange={(event) => onAlwaysOnTopChange(event.currentTarget.checked)}
-            size="md"
-            aria-label={labels.alwaysOnTop}
-          />
-        </Group>
-      </Paper>
-
-      <Paper p="md">
-        <Stack gap="sm">
-          <Text size="sm" fw={600}>
-            {labels.about}
-          </Text>
-          <Text size="xs" c="dimmed" style={{ lineHeight: 1.5 }}>
-            {labels.aboutBody}
-          </Text>
-          <Paper p="sm" bg="gray.0" withBorder>
-            <Text size="xs" c="dimmed">
-              {labels.creator}
-            </Text>
-            <Anchor
-              component="button"
-              type="button"
-              fw={600}
-              size="sm"
-              mt={4}
-              display="inline-block"
-              onClick={() => onOpenExternal(APP_CREATOR.url)}
-            >
-              {APP_CREATOR.name}
-            </Anchor>
-            <Text size="xs" c="dimmed" mt="sm">
-              {labels.version} {version}
-            </Text>
-          </Paper>
-        </Stack>
+      <Paper
+        p="md"
+        radius="lg"
+        style={{ background: "var(--color-elevated)", border: "none" }}
+      >
+        <Text size="sm" fw={600} mb="xs">
+          {labels.about}
+        </Text>
+        <Text size="xs" c="dimmed">
+          {labels.creator}{" "}
+          <Anchor
+            component="button"
+            type="button"
+            fw={600}
+            size="xs"
+            onClick={() => onOpenExternal(APP_CREATOR.url)}
+          >
+            {APP_CREATOR.name}
+          </Anchor>
+        </Text>
+        <Text size="xs" c="dimmed" mt={6}>
+          {labels.version} {version}
+        </Text>
       </Paper>
     </Stack>
   );

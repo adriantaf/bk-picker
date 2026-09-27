@@ -7,7 +7,7 @@ type TabBarProps = {
   labels: Record<AppTab, string>;
 };
 
-const TABS: AppTab[] = ["picker", "history", "palettes", "systems", "settings"];
+const TABS: AppTab[] = ["color", "image", "settings"];
 
 export function TabBar({ value, onChange, labels }: TabBarProps) {
   return (
@@ -16,15 +16,29 @@ export function TabBar({ value, onChange, labels }: TabBarProps) {
       onChange={(next) => {
         if (next) onChange(next as AppTab);
       }}
-      variant="pills"
-      radius="md"
+      variant="default"
     >
-      <Tabs.List grow style={{ flexWrap: "wrap", gap: 4 }}>
+      <Tabs.List
+        grow
+        style={{
+          flexWrap: "nowrap",
+          gap: 0,
+          borderBottom: "none",
+        }}
+      >
         {TABS.map((tab) => (
           <Tabs.Tab
             key={tab}
             value={tab}
-            style={{ flex: "1 1 auto", minWidth: 0, fontSize: 11, paddingInline: 6 }}
+            styles={{
+              tab: {
+                fontSize: 14,
+                fontWeight: 500,
+                paddingInline: 12,
+                paddingBlock: 12,
+                color: "var(--color-muted)",
+              },
+            }}
           >
             {labels[tab]}
           </Tabs.Tab>

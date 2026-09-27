@@ -347,4 +347,4 @@ export function contrastingInk(color: Color): "#111111" | "#F5F5F7" {
   return relativeLuminance(color.rgb) > 0.45 ? "#111111" : "#F5F5F7";
 }
 
-export const DEFAULT_COLOR: Color = colorFromRgb({ r: 48, g: 209, b: 88 });
+export const DEFAULT_COLOR: Color = colorFromRgb({ r: 59, g: 130, b: 246 });

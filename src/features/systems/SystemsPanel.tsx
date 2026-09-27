@@ -17,7 +17,6 @@ import {
   type ColorSystemId,
   type SystemMatch,
 } from "@/lib/colorSystems";
-import { ColorSwatch } from "@/ui";
 import type { Color } from "@/types";
 
 type SystemsPanelProps = {
@@ -25,6 +24,7 @@ type SystemsPanelProps = {
   onCopyToken: (text: string) => void;
   onCopyBoth: (token: string, hex: string) => void;
   onSelect: (hex: string) => void;
+  embedded?: boolean;
   labels: {
     title: string;
     hint: string;
@@ -68,7 +68,10 @@ function MatchRow({
       withBorder
       style={
         exact
-          ? { borderColor: "var(--mantine-color-teal-5)", boxShadow: "0 0 0 1px var(--mantine-color-teal-1)" }
+          ? {
+              borderColor: "var(--mantine-color-teal-5)",
+              boxShadow: "0 0 0 1px var(--mantine-color-teal-1)",
+            }
           : undefined
       }
     >
@@ -78,8 +81,8 @@ function MatchRow({
             onClick={() => onSelect(match.hex)}
             aria-label={match.hex}
             style={{
-              width: 36,
-              height: 36,
+              width: 32,
+              height: 32,
               borderRadius: 8,
               background: match.hex,
               border: "1px solid rgb(0 0 0 / 0.1)",
@@ -108,11 +111,7 @@ function MatchRow({
           </Stack>
         </Group>
         <Group gap={6}>
-          <Button
-            size="xs"
-            variant="light"
-            onClick={() => onCopy(match.copyText)}
-          >
+          <Button size="xs" variant="light" onClick={() => onCopy(match.copyText)}>
             {copyLabel}
           </Button>
           <Button
@@ -133,11 +132,15 @@ export function SystemsPanel({
   onCopyToken,
   onCopyBoth,
   onSelect,
+  embedded = false,
   labels,
 }: SystemsPanelProps) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<ColorSystemId | "all">("all");
-  const matches = useMemo(() => matchAllSystems(color, 3), [color]);
+  const matches = useMemo(
+    () => matchAllSystems(color, embedded ? 2 : 3),
+    [color, embedded],
+  );
 
   const systems = COLOR_SYSTEMS.filter(
     (s) => filter === "all" || s.id === filter,
@@ -146,29 +149,24 @@ export function SystemsPanel({
   const q = query.trim().toLowerCase();
 
   return (
-    <Stack gap="md" className="ui-fade">
-      <Paper p="md">
-        <Group justify="space-between" align="flex-start" wrap="nowrap" gap="sm">
-          <Stack gap={4} style={{ minWidth: 0, flex: 1 }}>
-            <Text size="sm" fw={600}>
-              {labels.title}
-            </Text>
-            <Text size="xs" c="dimmed">
-              {labels.hint}
-            </Text>
-            <Text size="sm" ff="monospace" fw={600} mt={4}>
-              {color.hex}
-            </Text>
-          </Stack>
-          <ColorSwatch color={color} size="lg" label={color.hex} />
-        </Group>
-      </Paper>
+    <Stack gap="sm" className="ui-fade">
+      {!embedded ? (
+        <Stack gap={4}>
+          <Text size="sm" fw={600}>
+            {labels.title}
+          </Text>
+          <Text size="xs" c="dimmed">
+            {labels.hint}
+          </Text>
+        </Stack>
+      ) : null}
 
       <TextInput
         size="xs"
         placeholder={labels.search}
         value={query}
         onChange={(e) => setQuery(e.currentTarget.value)}
+        radius="md"
       />
 
       <SegmentedControl

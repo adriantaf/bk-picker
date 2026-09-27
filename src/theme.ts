@@ -32,9 +32,9 @@ export const bkTheme = createTheme({
     },
     Paper: {
       defaultProps: {
-        radius: "md",
-        withBorder: true,
-        shadow: "xs",
+        radius: "lg",
+        withBorder: false,
+        shadow: "none",
       },
     },
     Tabs: {

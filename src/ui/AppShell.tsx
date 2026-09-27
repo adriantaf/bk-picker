@@ -1,21 +1,14 @@
-import { Group, Text, Box, Image, ScrollArea } from "@mantine/core";
+import { Box, ScrollArea } from "@mantine/core";
 import type { ReactNode } from "react";
-import brandIcon from "@/assets/brand-icon.png";
 
 type AppShellProps = {
   tabs: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
-  brandTitle?: string;
 };
 
-/** Content shell: brand header + tabs + scrollable main + optional footer. */
-export function AppShell({
-  tabs,
-  children,
-  footer,
-  brandTitle = "BK Picker",
-}: AppShellProps) {
+/** Content shell: tabs + scrollable main + optional footer (no in-app brand). */
+export function AppShell({ tabs, children, footer }: AppShellProps) {
   return (
     <Box
       style={{
@@ -29,30 +22,15 @@ export function AppShell({
       }}
     >
       <Box
-        px="sm"
+        px="md"
         pt="sm"
-        pb={8}
+        pb={0}
         style={{
           flexShrink: 0,
+          background: "var(--color-surface)",
           borderBottom: "1px solid var(--color-hairline)",
-          background:
-            "color-mix(in srgb, var(--color-surface) 92%, transparent)",
-          backdropFilter: "blur(10px)",
         }}
       >
-        <Group gap={8} mb={8} wrap="nowrap">
-          <Image
-            src={brandIcon}
-            alt=""
-            w={22}
-            h={22}
-            radius={6}
-            style={{ flexShrink: 0 }}
-          />
-          <Text size="sm" fw={700} style={{ letterSpacing: "-0.02em" }}>
-            {brandTitle}
-          </Text>
-        </Group>
         {tabs}
       </Box>
       <ScrollArea
