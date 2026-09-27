@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install frontend deps
+        run: npm ci
+
+      - name: Build Tauri (NSIS + MSI)
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: BK Picker ${{ github.ref_name }}
+          releaseBody: |
+            ## BK Picker ${{ github.ref_name }}
+
+            Utilidad de color para Windows · por [Adrian Tafoya](https://adriantaf.github.io)
+
+            ### Requisitos
+            - Windows 10/11
+            - WebView2 (el instalador puede descargarlo si falta)
+
+            ### Notas
+            - Atajo por defecto: `Alt+C`
+            - Landing: https://adriantaf.github.io/bk-picker/
+
+            ### Assets
+            Descarga el instalador `.msi` o el setup `.exe` (NSIS) de abajo.
+          releaseDraft: false
+          prerelease: false
+          args: ""
