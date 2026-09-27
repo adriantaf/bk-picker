@@ -154,6 +154,15 @@
         vertical-align: middle;
       }
 
+      .shot-app {
+        max-width: 420px;
+        margin-inline: auto;
+      }
+
+      .grid-2 .shot-app {
+        max-width: none;
+      }
+
       .shot figcaption {
         padding: 0.75rem 1rem 1rem;
         font-size: 0.9rem;
@@ -254,45 +263,36 @@
         </p>
       </section>
 
-      <section class="shots" aria-label="Capturas de BK Picker">
-        <figure class="shot">
+      <section class="shots" aria-label="Capturas reales de BK Picker">
+        <figure class="shot shot-app">
           <img
             src="./docs/assets/01-color.png"
-            alt="BK Picker: pestaña Color con valor formateado y contraste"
-            width="1280"
-            height="720"
+            alt="BK Picker: pestaña Color con color activo, Pipeta y Manual"
+            width="416"
+            height="659"
           />
-          <figcaption>Color activo, formatos de copia y contraste WCAG</figcaption>
+          <figcaption>Color activo, pipeta o ajuste manual, formatos y contraste</figcaption>
         </figure>
         <div class="grid-2">
-          <figure class="shot">
+          <figure class="shot shot-app">
             <img
-              src="./docs/assets/02-history.png"
-              alt="BK Picker: historial y favoritos"
-              width="1280"
-              height="720"
+              src="./docs/assets/02-image.png"
+              alt="BK Picker: pestaña Imagen con arrastrar, pegar y URL"
+              width="416"
+              height="659"
             />
-            <figcaption>Historial, favoritos y exportación</figcaption>
+            <figcaption>Muestreo desde imagen: archivo, URL, arrastrar o Ctrl+V</figcaption>
           </figure>
-          <figure class="shot">
+          <figure class="shot shot-app">
             <img
-              src="./docs/assets/03-systems.png"
-              alt="BK Picker: equivalentes Tailwind y Material"
-              width="1280"
-              height="720"
+              src="./docs/assets/03-settings.png"
+              alt="BK Picker: pestaña Ajustes con idioma y atajo"
+              width="416"
+              height="659"
             />
-            <figcaption>Tokens de sistemas listos para copiar</figcaption>
+            <figcaption>Idioma, atajo global y siempre visible</figcaption>
           </figure>
         </div>
-        <figure class="shot">
-          <img
-            src="./docs/assets/04-settings.png"
-            alt="BK Picker: ajustes e información del autor"
-            width="1280"
-            height="720"
-          />
-          <figcaption>Idioma, atajo e información del autor</figcaption>
-        </figure>
       </section>
 
       <section class="features" aria-label="Funciones">
