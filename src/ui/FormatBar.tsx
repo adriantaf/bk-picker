@@ -1,4 +1,4 @@
-import { Box, Button, Group, Stack, TextInput, UnstyledButton } from "@mantine/core";
+import { Button, Group, Stack, TextInput, UnstyledButton } from "@mantine/core";
 import type { ColorFormat } from "@/types";
 
 const FORMATS: ColorFormat[] = [
