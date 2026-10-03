@@ -31,4 +31,11 @@ export function toggleFavorite(
   );
 }
 
+export function removeHistoryItem(
+  items: HistoryItem[],
+  id: string,
+): HistoryItem[] {
+  return items.filter((item) => item.id !== id);
+}
+
 export { HISTORY_LIMIT };

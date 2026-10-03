@@ -34,14 +34,14 @@ function Root() {
 
   if (view === "loupe") {
     return (
-      <MantineProvider theme={bkTheme} forceColorScheme="light">
+      <MantineProvider theme={bkTheme} forceColorScheme="dark">
         <LoupeWindowApp locale={locale} />
       </MantineProvider>
     );
   }
 
   return (
-    <MantineProvider theme={bkTheme} forceColorScheme="light">
+    <MantineProvider theme={bkTheme} forceColorScheme="dark">
       <Notifications position="top-center" zIndex={4000} limit={2} />
       <App />
     </MantineProvider>

@@ -1,8 +1,6 @@
 import {
   Anchor,
   Box,
-  Group,
-  Paper,
   SegmentedControl,
   Stack,
   Switch,
@@ -40,34 +38,31 @@ type SettingsPanelProps = {
   };
 };
 
-function SettingsRow({
+function SettingsCard({
   title,
   hint,
-  control,
+  children,
 }: {
   title: string;
-  hint: string;
-  control: ReactNode;
+  hint?: string;
+  children: ReactNode;
 }) {
   return (
-    <Group
-      justify="space-between"
-      align="center"
-      wrap="nowrap"
-      gap="md"
-      py="md"
-      style={{ borderBottom: "1px solid var(--color-hairline)" }}
-    >
-      <Box style={{ minWidth: 0, flex: 1 }}>
-        <Text size="sm" fw={600}>
-          {title}
-        </Text>
-        <Text size="xs" c="dimmed" mt={2}>
-          {hint}
-        </Text>
-      </Box>
-      <Box style={{ flexShrink: 0 }}>{control}</Box>
-    </Group>
+    <Box className="ink-elevated" p="md" style={{ padding: 16 }}>
+      <Stack gap="sm">
+        <Box>
+          <Text size="sm" fw={600}>
+            {title}
+          </Text>
+          {hint ? (
+            <Text size="xs" c="dimmed" mt={4}>
+              {hint}
+            </Text>
+          ) : null}
+        </Box>
+        {children}
+      </Stack>
+    </Box>
   );
 }
 
@@ -85,73 +80,54 @@ export function SettingsPanel({
   labels,
 }: SettingsPanelProps) {
   return (
-    <Stack gap="lg" className="ui-fade">
-      <Paper p="md" radius="lg" withBorder={false} shadow="none" bg="var(--color-surface)">
-        <SettingsRow
-          title={labels.language}
-          hint={labels.languageHint}
-          control={
-            <LanguageToggle
-              locale={locale}
-              onChange={onLocaleChange}
-              label={labels.languageToggle}
-              labels={{ es: labels.languageEs, en: labels.languageEn }}
-            />
-          }
+    <Stack gap="md" className="ui-fade">
+      <SettingsCard title={labels.language} hint={labels.languageHint}>
+        <LanguageToggle
+          locale={locale}
+          onChange={onLocaleChange}
+          label={labels.languageToggle}
+          labels={{ es: labels.languageEs, en: labels.languageEn }}
         />
-        <Box py="md" style={{ borderBottom: "1px solid var(--color-hairline)" }}>
-          <Text size="sm" fw={600}>
-            {labels.shortcut}
-          </Text>
-          <Text size="xs" c="dimmed" mt={2} mb="sm">
-            {labels.shortcutHint}
-          </Text>
-          <SegmentedControl
-            value={shortcut}
-            onChange={onShortcutChange}
-            data={SHORTCUT_PRESETS.map((preset) => ({
-              value: preset,
-              label: preset,
-            }))}
-            fullWidth
-            radius="md"
-            styles={{
-              label: { whiteSpace: "nowrap", fontSize: 11 },
-            }}
-          />
-          <Text
-            size="xs"
-            c={shortcutIsError ? "red" : "dimmed"}
-            mt="xs"
-            role={shortcutIsError ? "alert" : undefined}
-          >
-            {shortcutStatusText}
-          </Text>
-        </Box>
-        <SettingsRow
-          title={labels.alwaysOnTop}
-          hint={labels.alwaysOnTopHint}
-          control={
-            <Switch
-              checked={alwaysOnTop}
-              onChange={(event) =>
-                onAlwaysOnTopChange(event.currentTarget.checked)
-              }
-              size="md"
-              aria-label={labels.alwaysOnTop}
-            />
-          }
-        />
-      </Paper>
+      </SettingsCard>
 
-      <Paper
-        p="md"
-        radius="lg"
-        style={{ background: "var(--color-elevated)", border: "none" }}
-      >
-        <Text size="sm" fw={600} mb="xs">
-          {labels.about}
+      <SettingsCard title={labels.shortcut} hint={labels.shortcutHint}>
+        <SegmentedControl
+          value={shortcut}
+          onChange={onShortcutChange}
+          data={SHORTCUT_PRESETS.map((preset) => ({
+            value: preset,
+            label: preset,
+          }))}
+          fullWidth
+          radius="md"
+          styles={{
+            root: {
+              background: "var(--color-base)",
+            },
+            label: { whiteSpace: "nowrap", fontSize: 11 },
+          }}
+        />
+        <Text
+          size="xs"
+          c={shortcutIsError ? "red" : "dimmed"}
+          role={shortcutIsError ? "alert" : undefined}
+        >
+          {shortcutStatusText}
         </Text>
+      </SettingsCard>
+
+      <SettingsCard title={labels.alwaysOnTop} hint={labels.alwaysOnTopHint}>
+        <Switch
+          checked={alwaysOnTop}
+          onChange={(event) =>
+            onAlwaysOnTopChange(event.currentTarget.checked)
+          }
+          size="md"
+          aria-label={labels.alwaysOnTop}
+        />
+      </SettingsCard>
+
+      <SettingsCard title={labels.about}>
         <Text size="xs" c="dimmed">
           {labels.creator}{" "}
           <Anchor
@@ -164,10 +140,10 @@ export function SettingsPanel({
             {APP_CREATOR.name}
           </Anchor>
         </Text>
-        <Text size="xs" c="dimmed" mt={6}>
+        <Text size="xs" c="dimmed">
           {labels.version} {version}
         </Text>
-      </Paper>
+      </SettingsCard>
     </Stack>
   );
 }

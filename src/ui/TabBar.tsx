@@ -1,4 +1,4 @@
-import { Tabs } from "@mantine/core";
+import { SegmentedControl } from "@mantine/core";
 import type { AppTab } from "@/types";
 
 type TabBarProps = {
@@ -7,43 +7,21 @@ type TabBarProps = {
   labels: Record<AppTab, string>;
 };
 
-const TABS: AppTab[] = ["color", "image", "settings"];
+const TABS: AppTab[] = ["workspace", "history", "settings"];
 
 export function TabBar({ value, onChange, labels }: TabBarProps) {
   return (
-    <Tabs
+    <SegmentedControl
+      fullWidth
       value={value}
       onChange={(next) => {
         if (next) onChange(next as AppTab);
       }}
-      variant="default"
-    >
-      <Tabs.List
-        grow
-        style={{
-          flexWrap: "nowrap",
-          gap: 0,
-          borderBottom: "none",
-        }}
-      >
-        {TABS.map((tab) => (
-          <Tabs.Tab
-            key={tab}
-            value={tab}
-            styles={{
-              tab: {
-                fontSize: 14,
-                fontWeight: 500,
-                paddingInline: 12,
-                paddingBlock: 12,
-                color: "var(--color-muted)",
-              },
-            }}
-          >
-            {labels[tab]}
-          </Tabs.Tab>
-        ))}
-      </Tabs.List>
-    </Tabs>
+      data={TABS.map((tab) => ({
+        value: tab,
+        label: labels[tab],
+      }))}
+      radius="md"
+    />
   );
 }

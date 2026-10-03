@@ -20,6 +20,7 @@ export type ColorSystemDef = {
   id: ColorSystemId;
   labelKey: string;
   swatches: SystemSwatch[];
+  match: (color: Color, limit?: number) => SystemMatch[];
 };
 
 function hexToRgb(hex: string): Rgb {
@@ -265,19 +266,38 @@ const CSS_NAMED = buildCssNamed();
 const BOOTSTRAP = buildBootstrap();
 
 export const COLOR_SYSTEMS: ColorSystemDef[] = [
-  { id: "tailwind", labelKey: "systems.tailwind", swatches: TAILWIND },
-  { id: "material", labelKey: "systems.material", swatches: MATERIAL },
-  { id: "css", labelKey: "systems.css", swatches: CSS_NAMED },
-  { id: "bootstrap", labelKey: "systems.bootstrap", swatches: BOOTSTRAP },
+  {
+    id: "tailwind",
+    labelKey: "systems.tailwind",
+    swatches: TAILWIND,
+    match: (color, limit = 3) => nearestInPalette(color, "tailwind", TAILWIND, limit),
+  },
+  {
+    id: "material",
+    labelKey: "systems.material",
+    swatches: MATERIAL,
+    match: (color, limit = 3) => nearestInPalette(color, "material", MATERIAL, limit),
+  },
+  {
+    id: "css",
+    labelKey: "systems.css",
+    swatches: CSS_NAMED,
+    match: (color, limit = 3) => nearestInPalette(color, "css", CSS_NAMED, limit),
+  },
+  {
+    id: "bootstrap",
+    labelKey: "systems.bootstrap",
+    swatches: BOOTSTRAP,
+    match: (color, limit = 3) => nearestInPalette(color, "bootstrap", BOOTSTRAP, limit),
+  },
 ];
 
 export function matchAllSystems(color: Color, limit = 3): Record<ColorSystemId, SystemMatch[]> {
-  return {
-    tailwind: nearestInPalette(color, "tailwind", TAILWIND, limit),
-    material: nearestInPalette(color, "material", MATERIAL, limit),
-    css: nearestInPalette(color, "css", CSS_NAMED, limit),
-    bootstrap: nearestInPalette(color, "bootstrap", BOOTSTRAP, limit),
-  };
+  const out = {} as Record<ColorSystemId, SystemMatch[]>;
+  for (const system of COLOR_SYSTEMS) {
+    out[system.id] = system.match(color, limit);
+  }
+  return out;
 }
 
 export function colorFromSystemHex(hex: string): Color {

@@ -3,9 +3,9 @@ import { createTheme, rem } from "@mantine/core";
 export const bkTheme = createTheme({
   primaryColor: "blue",
   fontFamily:
-    '"Segoe UI", "SF Pro Text", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif',
+    '"Segoe UI Variable", "Segoe UI", "SF Pro Text", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif',
   fontFamilyMonospace:
-    '"Cascadia Mono", "SF Mono", ui-monospace, Consolas, monospace',
+    '"Cascadia Mono", "JetBrains Mono", "SF Mono", ui-monospace, Consolas, monospace',
   defaultRadius: "md",
   cursorType: "pointer",
   spacing: {
@@ -14,6 +14,20 @@ export const bkTheme = createTheme({
     md: rem(14),
     lg: rem(20),
     xl: rem(28),
+  },
+  colors: {
+    dark: [
+      "#e8eef6",
+      "#c5cedc",
+      "#8b97a8",
+      "#5c687a",
+      "#3a4556",
+      "#242c3b",
+      "#1c2330",
+      "#161b22",
+      "#12161d",
+      "#0e1116",
+    ],
   },
   headings: {
     fontWeight: "600",
@@ -26,7 +40,8 @@ export const bkTheme = createTheme({
       },
       styles: {
         root: {
-          transition: "background-color 120ms ease, transform 120ms ease, box-shadow 120ms ease",
+          transition:
+            "background-color 140ms ease, transform 140ms ease, box-shadow 140ms ease",
         },
       },
     },
@@ -35,11 +50,6 @@ export const bkTheme = createTheme({
         radius: "lg",
         withBorder: false,
         shadow: "none",
-      },
-    },
-    Tabs: {
-      defaultProps: {
-        radius: "md",
       },
     },
     SegmentedControl: {
@@ -54,7 +64,7 @@ export const bkTheme = createTheme({
         size: "sm",
       },
     },
-    Alert: {
+    ActionIcon: {
       defaultProps: {
         radius: "md",
       },
@@ -62,7 +72,7 @@ export const bkTheme = createTheme({
     Notification: {
       styles: {
         root: {
-          boxShadow: "0 8px 24px rgb(0 0 0 / 0.12)",
+          boxShadow: "0 8px 32px rgb(0 0 0 / 0.35)",
         },
       },
     },

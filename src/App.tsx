@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Accordion, Button, Center, Loader, Stack, Text } from "@mantine/core";
+import { Button, Center, Loader, Stack, Text } from "@mantine/core";
 import { getVersion } from "@tauri-apps/api/app";
-import { ActiveColorPanel, ImageColorPanel } from "@/features/color-picker";
 import { HistoryList } from "@/features/history";
-import { prependHistory, toggleFavorite } from "@/features/history/historyStore";
+import {
+  prependHistory,
+  removeHistoryItem,
+  toggleFavorite,
+} from "@/features/history/historyStore";
 import { OnboardingModal } from "@/features/onboarding";
-import { PalettePanel } from "@/features/palette";
 import { SettingsPanel, ShortcutBanner } from "@/features/settings";
-import { SystemsPanel } from "@/features/systems";
+import { ColorWorkspace } from "@/features/workspace";
 import { t } from "@/i18n";
 import {
   colorFromHex,
@@ -55,7 +57,7 @@ import type {
   LoupeUpdate,
   PickerMode,
 } from "@/types";
-import { AppShell, TabBar } from "@/ui";
+import { AppShell } from "@/ui";
 
 type BootState = "loading" | "ready" | "error";
 
@@ -73,7 +75,7 @@ function isEditableTarget(target: EventTarget | null): boolean {
 export function App() {
   const [boot, setBoot] = useState<BootState>("loading");
   const [bootTick, setBootTick] = useState(0);
-  const [tab, setTab] = useState<AppTab>("color");
+  const [tab, setTab] = useState<AppTab>("workspace");
   const [pickerMode, setPickerMode] = useState<PickerMode>("manual");
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [activeColor, setActiveColor] = useState<Color>(DEFAULT_COLOR);
@@ -147,6 +149,10 @@ export function App() {
     document.documentElement.lang = locale;
   }, [locale]);
 
+  useEffect(() => {
+    document.documentElement.style.setProperty("--active-glow", activeColor.hex);
+  }, [activeColor.hex]);
+
   const pushColor = useCallback((color: Color) => {
     setActiveColor(color);
     setHistory((prev) => {
@@ -174,7 +180,7 @@ export function App() {
 
       setPicking(false);
       setLoupeSample(null);
-      setTab("color");
+      setTab("workspace");
       setPickerMode("eyedropper");
       pushColor(color);
 
@@ -220,7 +226,7 @@ export function App() {
         return;
       }
       if (isEditableTarget(event.target)) return;
-      if (tab !== "color" || picking) return;
+      if (tab !== "workspace" || picking) return;
       event.preventDefault();
       void copyFormatted(activeColor).catch(() =>
         notifyError(t(locale, "copy.failed")),
@@ -234,7 +240,7 @@ export function App() {
   useEffect(() => {
     async function onPaste(event: ClipboardEvent) {
       if (isEditableTarget(event.target)) return;
-      if (tab === "image") return;
+      if (pickerMode === "image" && tab === "workspace") return;
 
       const text = event.clipboardData?.getData("text")?.trim();
       if (!text) return;
@@ -252,7 +258,7 @@ export function App() {
 
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);
-  }, [copyFormatted, locale, pushColor, tab]);
+  }, [copyFormatted, locale, pickerMode, pushColor, tab]);
 
   async function persistSettings(next: AppSettings) {
     setSettings(next);
@@ -298,7 +304,7 @@ export function App() {
   }
 
   async function handleStartPick() {
-    setTab("color");
+    setTab("workspace");
     setPickerMode("eyedropper");
     setPicking(true);
     try {
@@ -319,6 +325,7 @@ export function App() {
 
   async function handleSelectHistory(item: HistoryItem) {
     setActiveColor(item.color);
+    setTab("workspace");
     try {
       await copyFormatted(item.color);
     } catch {
@@ -329,6 +336,14 @@ export function App() {
   function handleToggleFavorite(item: HistoryItem) {
     setHistory((prev) => {
       const next = toggleFavorite(prev, item.id);
+      void saveHistory(next);
+      return next;
+    });
+  }
+
+  function handleRemoveHistory(item: HistoryItem) {
+    setHistory((prev) => {
+      const next = removeHistoryItem(prev, item.id);
       void saveHistory(next);
       return next;
     });
@@ -382,7 +397,7 @@ export function App() {
 
   function handleImagePick(color: Color) {
     pushColor(color);
-    setTab("color");
+    setTab("workspace");
     void copyFormatted(color)
       .then(() => undefined)
       .catch(() => {
@@ -502,22 +517,18 @@ export function App() {
         }}
       />
       <AppShell
-        tabs={
-          <TabBar
-            value={tab}
-            onChange={(next) => {
-              if (picking && next !== "color") void handleStopPick();
-              setTab(next);
-            }}
-            labels={{
-              color: t(locale, "tab.color"),
-              image: t(locale, "tab.image"),
-              settings: t(locale, "tab.settings"),
-            }}
-          />
-        }
+        tab={tab}
+        onTabChange={(next) => {
+          if (picking && next !== "workspace") void handleStopPick();
+          setTab(next);
+        }}
+        tabLabels={{
+          workspace: t(locale, "tab.workspace"),
+          history: t(locale, "tab.history"),
+          settings: t(locale, "tab.settings"),
+        }}
         footer={
-          tab === "color" ? (
+          tab === "workspace" ? (
             <ShortcutBanner
               label={t(locale, "shortcut.label")}
               statusText={shortcutStatusText}
@@ -526,142 +537,112 @@ export function App() {
           ) : null
         }
       >
-        {tab === "color" ? (
-          <ActiveColorPanel
-            selectedLabel={t(locale, "active.selected")}
+        {tab === "workspace" ? (
+          <ColorWorkspace
             color={activeColor}
-            formattedValue={formatColor(activeColor, settings.copyFormat)}
             copyFormat={settings.copyFormat}
             formatLabels={formatLabels}
-            copyLabel={t(locale, "copy.label")}
-            copiedLabel={t(locale, "copy.copied")}
-            failedLabel={t(locale, "copy.failed")}
-            hexLabel={t(locale, "hex.label")}
-            hexInvalidLabel={t(locale, "hex.invalid")}
-            saturationLabel={t(locale, "picker.saturation")}
-            hueLabel={t(locale, "picker.hue")}
-            pickLabel={t(locale, "pick.start")}
-            pickActiveLabel={t(locale, "pick.active")}
-            pickHint={t(locale, "pick.hint")}
-            pickCancelLabel={t(locale, "pick.cancel")}
-            loupeCenterLabel={t(locale, "loupe.center")}
-            valueLabel={t(locale, "active.value")}
-            formatLabel={t(locale, "active.format")}
-            contrastLabels={{
-              title: t(locale, "contrast.title"),
-              onWhite: t(locale, "contrast.onWhite"),
-              onBlack: t(locale, "contrast.onBlack"),
-              pass: t(locale, "contrast.pass"),
-              fail: t(locale, "contrast.fail"),
-            }}
             mode={pickerMode}
             onModeChange={handleModeChange}
             modeLabels={{
               eyedropper: t(locale, "mode.eyedropper"),
               manual: t(locale, "mode.manual"),
+              image: t(locale, "mode.image"),
             }}
             picking={picking}
             loupeSample={loupeSample}
+            history={history}
             onColorChange={setActiveColor}
             onFormatChange={(format) => void handleFormatChange(format)}
             onCopy={handleCopy}
-            onCopyError={() => notifyError(t(locale, "copy.failed"))}
             onStartPick={() => void handleStartPick()}
             onStopPick={() => void handleStopPick()}
-          >
-            <Accordion
-              multiple
-              defaultValue={["history"]}
-              variant="separated"
-              radius="md"
-              mt="sm"
-            >
-              <Accordion.Item value="history">
-                <Accordion.Control>{t(locale, "tab.history")}</Accordion.Control>
-                <Accordion.Panel>
-                  <HistoryList
-                    title={t(locale, "history.title")}
-                    favoritesTitle={t(locale, "history.favorites")}
-                    emptyTitle={t(locale, "history.empty")}
-                    favoriteLabel={t(locale, "history.favorite")}
-                    searchPlaceholder={t(locale, "history.search")}
-                    clearLabel={t(locale, "history.clear")}
-                    exportCssLabel={t(locale, "history.exportCss")}
-                    exportJsonLabel={t(locale, "history.exportJson")}
-                    items={history}
-                    activeHex={activeColor.hex}
-                    onSelect={(item) => void handleSelectHistory(item)}
-                    onToggleFavorite={handleToggleFavorite}
-                    onClear={handleClearHistory}
-                    onExportCss={() => void handleExportHistoryCss()}
-                    onExportJson={() => void handleExportHistoryJson()}
-                  />
-                </Accordion.Panel>
-              </Accordion.Item>
-              <Accordion.Item value="systems">
-                <Accordion.Control>{t(locale, "tab.systems")}</Accordion.Control>
-                <Accordion.Panel>
-                  <SystemsPanel
-                    color={activeColor}
-                    embedded
-                    onCopyToken={(token) => void handleCopySystemToken(token)}
-                    onCopyBoth={(token, hex) =>
-                      void handleCopySystemBoth(token, hex)
-                    }
-                    onSelect={(hex) => void handleSelectSystemHex(hex)}
-                    labels={{
-                      title: t(locale, "systems.title"),
-                      hint: t(locale, "systems.hint"),
-                      nearest: t(locale, "systems.nearest"),
-                      exact: t(locale, "systems.exact"),
-                      copyToken: t(locale, "systems.copyToken"),
-                      copyBoth: t(locale, "systems.copyBoth"),
-                      delta: t(locale, "systems.delta"),
-                      search: t(locale, "systems.search"),
-                      filterAll: t(locale, "systems.filterAll"),
-                      systemLabels: {
-                        tailwind: t(locale, "systems.tailwind"),
-                        material: t(locale, "systems.material"),
-                        css: t(locale, "systems.css"),
-                        bootstrap: t(locale, "systems.bootstrap"),
-                      },
-                    }}
-                  />
-                </Accordion.Panel>
-              </Accordion.Item>
-              <Accordion.Item value="palettes">
-                <Accordion.Control>{t(locale, "tab.palettes")}</Accordion.Control>
-                <Accordion.Panel>
-                  <PalettePanel
-                    color={activeColor}
-                    copyFormat={settings.copyFormat}
-                    onSelect={(color) => {
-                      setActiveColor(color);
-                      void copyFormatted(color).catch(() =>
-                        notifyError(t(locale, "copy.failed")),
-                      );
-                    }}
-                    onCopyColor={handleCopyPaletteColor}
-                    onExport={handleExportPalette}
-                    labels={{
-                      complementary: t(locale, "palette.complementary"),
-                      complementaryHint: t(locale, "palette.complementaryHint"),
-                      analogous: t(locale, "palette.analogous"),
-                      analogousHint: t(locale, "palette.analogousHint"),
-                      triadic: t(locale, "palette.triadic"),
-                      triadicHint: t(locale, "palette.triadicHint"),
-                      export: t(locale, "palette.export"),
-                      clickHint: t(locale, "palette.clickHint"),
-                    }}
-                  />
-                </Accordion.Panel>
-              </Accordion.Item>
-            </Accordion>
-          </ActiveColorPanel>
+            onSelectHistory={(item) => void handleSelectHistory(item)}
+            onOpenHistory={() => setTab("history")}
+            onImagePick={handleImagePick}
+            onCopySystemToken={(token) => void handleCopySystemToken(token)}
+            onCopySystemBoth={(token, hex) =>
+              void handleCopySystemBoth(token, hex)
+            }
+            onSelectSystemHex={(hex) => void handleSelectSystemHex(hex)}
+            onCopyPaletteColor={handleCopyPaletteColor}
+            onExportPalette={handleExportPalette}
+            labels={{
+              selected: t(locale, "active.selected"),
+              copy: t(locale, "copy.label"),
+              hex: t(locale, "hex.label"),
+              hexInvalid: t(locale, "hex.invalid"),
+              saturation: t(locale, "picker.saturation"),
+              hue: t(locale, "picker.hue"),
+              pick: t(locale, "pick.start"),
+              pickActive: t(locale, "pick.active"),
+              pickHint: t(locale, "pick.hint"),
+              pickCancel: t(locale, "pick.cancel"),
+              loupeCenter: t(locale, "loupe.center"),
+              recent: t(locale, "workspace.recent"),
+              viewAll: t(locale, "workspace.viewAll"),
+              capture: t(locale, "workspace.capture"),
+              equivalences: t(locale, "workspace.equivalences"),
+              palettes: t(locale, "workspace.palettes"),
+              systemsExact: t(locale, "systems.exact"),
+              systemsDelta: t(locale, "systems.delta"),
+              systemsCopyToken: t(locale, "systems.copyToken"),
+              systemsCopyBoth: t(locale, "systems.copyBoth"),
+              systemsLabels: {
+                tailwind: t(locale, "systems.tailwind"),
+                material: t(locale, "systems.material"),
+                css: t(locale, "systems.css"),
+                bootstrap: t(locale, "systems.bootstrap"),
+              },
+              contrast: {
+                title: t(locale, "contrast.title"),
+                onWhite: t(locale, "contrast.onWhite"),
+                onBlack: t(locale, "contrast.onBlack"),
+                pass: t(locale, "contrast.pass"),
+                fail: t(locale, "contrast.fail"),
+              },
+              image: imageLabels,
+              palette: {
+                complementary: t(locale, "palette.complementary"),
+                complementaryHint: t(locale, "palette.complementaryHint"),
+                analogous: t(locale, "palette.analogous"),
+                analogousHint: t(locale, "palette.analogousHint"),
+                triadic: t(locale, "palette.triadic"),
+                triadicHint: t(locale, "palette.triadicHint"),
+                export: t(locale, "palette.export"),
+                clickHint: t(locale, "palette.clickHint"),
+              },
+            }}
+          />
         ) : null}
 
-        {tab === "image" ? (
-          <ImageColorPanel onPick={handleImagePick} labels={imageLabels} />
+        {tab === "history" ? (
+          <HistoryList
+            title={t(locale, "history.title")}
+            favoritesTitle={t(locale, "history.favorites")}
+            emptyTitle={t(locale, "history.empty")}
+            emptyCta={t(locale, "pick.start")}
+            onEmptyCta={() => {
+              setTab("workspace");
+              void handleStartPick();
+            }}
+            favoriteLabel={t(locale, "history.favorite")}
+            copyLabel={t(locale, "history.copy")}
+            removeLabel={t(locale, "history.remove")}
+            searchPlaceholder={t(locale, "history.search")}
+            clearLabel={t(locale, "history.clear")}
+            exportCssLabel={t(locale, "history.exportCss")}
+            exportJsonLabel={t(locale, "history.exportJson")}
+            items={history}
+            activeHex={activeColor.hex}
+            onSelect={(item) => void handleSelectHistory(item)}
+            onCopy={(item) => void handleSelectHistory(item)}
+            onToggleFavorite={handleToggleFavorite}
+            onRemove={handleRemoveHistory}
+            onClear={handleClearHistory}
+            onExportCss={() => void handleExportHistoryCss()}
+            onExportJson={() => void handleExportHistoryJson()}
+          />
         ) : null}
 
         {tab === "settings" ? (

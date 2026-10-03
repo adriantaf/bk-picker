@@ -1,9 +1,14 @@
 export { AppShell } from "./AppShell";
 export { AppShell as WindowChrome } from "./AppShell";
+export { ActionChip, ActionChipRow } from "./ActionChip";
 export { ColorSwatch } from "./ColorSwatch";
 export { CopyButton } from "./CopyButton";
 export { EmptyState } from "./EmptyState";
+export { FormatBar } from "./FormatBar";
 export { FormatSelector } from "./FormatSelector";
+export { HistoryCard } from "./HistoryCard";
+export { IconRail } from "./IconRail";
 export { LanguageToggle } from "./LanguageToggle";
+export { MatchCard } from "./MatchCard";
 export { PaletteRow } from "./PaletteRow";
 export { TabBar } from "./TabBar";

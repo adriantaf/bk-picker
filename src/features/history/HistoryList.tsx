@@ -3,20 +3,24 @@ import {
   Badge,
   Button,
   Group,
-  Paper,
+  SimpleGrid,
   Stack,
   Text,
   TextInput,
 } from "@mantine/core";
 import { EmptyState } from "@/ui/EmptyState";
+import { HistoryCard } from "@/ui/HistoryCard";
 import type { HistoryItem } from "@/types";
-import { HistoryItemView } from "./HistoryItem";
 
 type HistoryListProps = {
   title: string;
   favoritesTitle: string;
   emptyTitle: string;
+  emptyCta?: string;
+  onEmptyCta?: () => void;
   favoriteLabel: string;
+  copyLabel: string;
+  removeLabel: string;
   searchPlaceholder: string;
   clearLabel: string;
   exportCssLabel: string;
@@ -24,7 +28,9 @@ type HistoryListProps = {
   items: HistoryItem[];
   activeHex: string;
   onSelect: (item: HistoryItem) => void;
+  onCopy: (item: HistoryItem) => void;
   onToggleFavorite: (item: HistoryItem) => void;
+  onRemove: (item: HistoryItem) => void;
   onClear: () => void;
   onExportCss: () => void;
   onExportJson: () => void;
@@ -34,7 +40,11 @@ export function HistoryList({
   title,
   favoritesTitle,
   emptyTitle,
+  emptyCta,
+  onEmptyCta,
   favoriteLabel,
+  copyLabel,
+  removeLabel,
   searchPlaceholder,
   clearLabel,
   exportCssLabel,
@@ -42,7 +52,9 @@ export function HistoryList({
   items,
   activeHex,
   onSelect,
+  onCopy,
   onToggleFavorite,
+  onRemove,
   onClear,
   onExportCss,
   onExportJson,
@@ -66,6 +78,12 @@ export function HistoryList({
 
   return (
     <Stack gap="md" className="ui-fade">
+      <Group justify="space-between" align="center">
+        <Text size="sm" fw={700}>
+          {title}
+        </Text>
+      </Group>
+
       <Group gap="xs" wrap="wrap">
         <TextInput
           size="xs"
@@ -73,6 +91,12 @@ export function HistoryList({
           value={query}
           onChange={(e) => setQuery(e.currentTarget.value)}
           style={{ flex: "1 1 140px" }}
+          styles={{
+            input: {
+              background: "var(--color-elevated)",
+              border: "1px solid var(--color-hairline)",
+            },
+          }}
         />
         <Button size="xs" variant="default" onClick={onExportCss} disabled={items.length === 0}>
           {exportCssLabel}
@@ -91,62 +115,65 @@ export function HistoryList({
         </Button>
       </Group>
 
+      {items.length === 0 ? (
+        <EmptyState
+          title={emptyTitle}
+          actionLabel={emptyCta}
+          onAction={onEmptyCta}
+        />
+      ) : null}
+
       {favorites.length > 0 ? (
         <Stack gap="xs">
           <Group justify="space-between" px={2}>
             <Text size="sm" fw={600}>
               {favoritesTitle}
             </Text>
-            <Badge color="orange" variant="light" size="sm">
+            <Badge color="yellow" variant="light" size="sm">
               {favorites.length}
             </Badge>
           </Group>
-          <Paper p={6} component="ul" style={{ listStyle: "none", margin: 0 }}>
+          <SimpleGrid cols={2} spacing="sm">
             {favorites.map((item) => (
-              <li key={`fav-${item.id}`}>
-                <HistoryItemView
-                  item={item}
-                  selected={item.color.hex === activeHex}
-                  favoriteLabel={favoriteLabel}
-                  onSelect={onSelect}
-                  onToggleFavorite={onToggleFavorite}
-                />
-              </li>
+              <HistoryCard
+                key={item.id}
+                item={item}
+                selected={item.color.hex === activeHex}
+                favoriteLabel={favoriteLabel}
+                copyLabel={copyLabel}
+                removeLabel={removeLabel}
+                onSelect={onSelect}
+                onCopy={onCopy}
+                onToggleFavorite={onToggleFavorite}
+                onRemove={onRemove}
+              />
             ))}
-          </Paper>
+          </SimpleGrid>
         </Stack>
       ) : null}
 
-      <Stack gap="xs">
-        <Group justify="space-between" px={2}>
-          <Text size="sm" fw={600}>
-            {title}
-          </Text>
-          <Badge color="gray" variant="light" size="sm">
-            {recent.length}
-          </Badge>
-        </Group>
+      {recent.length > 0 ? (
+        <SimpleGrid cols={2} spacing="sm">
+          {recent.map((item) => (
+            <HistoryCard
+              key={item.id}
+              item={item}
+              selected={item.color.hex === activeHex}
+              favoriteLabel={favoriteLabel}
+              copyLabel={copyLabel}
+              removeLabel={removeLabel}
+              onSelect={onSelect}
+              onCopy={onCopy}
+              onToggleFavorite={onToggleFavorite}
+              onRemove={onRemove}
+            />
+          ))}
+        </SimpleGrid>
+      ) : null}
 
-        {recent.length === 0 && favorites.length === 0 ? (
-          <EmptyState title={emptyTitle} />
-        ) : recent.length === 0 ? (
-          <EmptyState title={emptyTitle} />
-        ) : (
-          <Paper p={6} component="ul" style={{ listStyle: "none", margin: 0 }}>
-            {recent.map((item) => (
-              <li key={item.id}>
-                <HistoryItemView
-                  item={item}
-                  selected={item.color.hex === activeHex}
-                  favoriteLabel={favoriteLabel}
-                  onSelect={onSelect}
-                  onToggleFavorite={onToggleFavorite}
-                />
-              </li>
-            ))}
-          </Paper>
-        )}
-      </Stack>
+      {items.length > 0 && filtered.length === 0 ? (
+        <EmptyState title={emptyTitle} />
+      ) : null}
     </Stack>
   );
 }

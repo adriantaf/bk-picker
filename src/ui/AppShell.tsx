@@ -1,66 +1,74 @@
-import { Box, ScrollArea } from "@mantine/core";
+import { Box } from "@mantine/core";
 import type { ReactNode } from "react";
+import { IconRail } from "./IconRail";
+import type { AppTab } from "@/types";
 
 type AppShellProps = {
-  tabs: ReactNode;
+  tab: AppTab;
+  onTabChange: (tab: AppTab) => void;
+  tabLabels: Record<AppTab, string>;
   children: ReactNode;
   footer?: ReactNode;
 };
 
-/** Content shell: tabs + scrollable main + optional footer (no in-app brand). */
-export function AppShell({ tabs, children, footer }: AppShellProps) {
+/** Dark shell: left icon rail + scrollable main. */
+export function AppShell({
+  tab,
+  onTabChange,
+  tabLabels,
+  children,
+  footer,
+}: AppShellProps) {
   return (
     <Box
       style={{
         display: "flex",
-        flexDirection: "column",
         height: "100dvh",
         maxHeight: "100dvh",
         overflow: "hidden",
-        background: "var(--color-base)",
+        background: `
+          radial-gradient(900px 420px at 20% -10%, color-mix(in srgb, var(--active-glow) 28%, transparent), transparent 55%),
+          var(--color-base)
+        `,
         color: "var(--color-text)",
       }}
     >
+      <IconRail value={tab} onChange={onTabChange} labels={tabLabels} />
       <Box
-        px="md"
-        pt="sm"
-        pb={0}
         style={{
-          flexShrink: 0,
-          background: "var(--color-surface)",
-          borderBottom: "1px solid var(--color-hairline)",
+          flex: 1,
+          minWidth: 0,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
         }}
       >
-        {tabs}
-      </Box>
-      <ScrollArea
-        style={{ flex: 1, minHeight: 0 }}
-        type="auto"
-        offsetScrollbars
-        scrollbarSize={8}
-      >
         <Box
-          px="md"
-          py="md"
-          className="ui-fade"
-          style={{ minWidth: 0, maxWidth: 560, marginInline: "auto" }}
-        >
-          {children}
-        </Box>
-      </ScrollArea>
-      {footer ? (
-        <Box
-          px="md"
-          py={8}
           style={{
-            flexShrink: 0,
-            borderTop: "1px solid var(--color-hairline)",
-            background: "var(--color-surface)",
+            flex: 1,
+            minHeight: 0,
+            overflow: "auto",
+            padding: "16px 18px",
           }}
+          className="ui-fade"
         >
-          {footer}
+          <Box style={{ maxWidth: 520, marginInline: "auto" }}>{children}</Box>
         </Box>
-      ) : null}
+        {footer ? (
+          <Box
+            px="md"
+            py={8}
+            style={{
+              flexShrink: 0,
+              borderTop: "1px solid var(--color-hairline)",
+              background: "color-mix(in srgb, var(--color-surface) 80%, transparent)",
+              backdropFilter: "blur(10px)",
+            }}
+          >
+            {footer}
+          </Box>
+        ) : null}
+      </Box>
     </Box>
   );
 }

@@ -207,8 +207,8 @@ export function ImageColorPanel({ onPick, labels }: ImageColorPanelProps) {
             ? "var(--mantine-color-blue-5)"
             : "var(--color-border)",
           background: dragging
-            ? "var(--mantine-color-blue-0)"
-            : "var(--color-surface)",
+            ? "color-mix(in srgb, var(--color-accent) 16%, var(--color-surface))"
+            : "var(--color-elevated)",
           transition: "background-color 120ms ease, border-color 120ms ease",
         }}
       >
