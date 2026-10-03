@@ -48,14 +48,14 @@ function SettingsCard({
   children: ReactNode;
 }) {
   return (
-    <Box className="ink-elevated" p="md" style={{ padding: 16 }}>
-      <Stack gap="sm">
+    <Box className="ink-elevated" style={{ padding: 18 }}>
+      <Stack gap="md">
         <Box>
-          <Text size="sm" fw={600}>
+          <Text size="sm" fw={650}>
             {title}
           </Text>
           {hint ? (
-            <Text size="xs" c="dimmed" mt={4}>
+            <Text size="xs" c="dimmed" mt={5} style={{ lineHeight: 1.45 }}>
               {hint}
             </Text>
           ) : null}

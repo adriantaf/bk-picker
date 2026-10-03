@@ -21,6 +21,7 @@ import { SystemMatchGrid } from "@/features/systems/SystemMatchGrid";
 import { contrastReport, contrastingInk, formatColor } from "@/lib/color";
 import { ActionChip, ActionChipRow } from "@/ui/ActionChip";
 import { FormatBar } from "@/ui/FormatBar";
+import { Surface } from "@/ui/Surface";
 import type {
   Color,
   ColorFormat,
@@ -151,54 +152,57 @@ export function ColorWorkspace({
   }, [color.hex]);
 
   return (
-    <Stack gap="md" className="ui-fade">
+    <Stack gap={18}>
       <Box style={{ position: "relative" }}>
         <Box
           aria-hidden
           style={{
             position: "absolute",
-            inset: "-18px -8px auto",
-            height: 120,
-            borderRadius: 40,
-            background: `radial-gradient(ellipse at center, ${color.hex}55, transparent 70%)`,
-            filter: "blur(18px)",
+            inset: "-28px -16px auto",
+            height: 140,
+            borderRadius: 48,
+            background: `radial-gradient(ellipse at center, ${color.hex}66, transparent 72%)`,
+            filter: "blur(22px)",
             pointerEvents: "none",
             zIndex: 0,
+            transition: "background var(--motion-slow)",
           }}
         />
         <Box
+          className="ink-hero"
           style={{
             position: "relative",
             zIndex: 1,
-            height: 148,
-            borderRadius: 20,
+            height: 168,
             background: color.hex,
             display: "grid",
             placeItems: "center",
-            boxShadow: "inset 0 0 0 1px rgb(255 255 255 / 0.08)",
           }}
         >
-          <Stack gap={8} align="center">
+          <Stack gap={10} align="center" style={{ position: "relative", zIndex: 1 }}>
             <Text
               size="xs"
               tt="uppercase"
-              fw={600}
+              fw={650}
               style={{
-                letterSpacing: "0.08em",
+                letterSpacing: "0.1em",
                 color: ink,
-                opacity: 0.72,
+                opacity: 0.7,
               }}
             >
               {labels.selected}
             </Text>
             <Text
+              key={color.hex}
               ff="monospace"
               fw={700}
+              className="ui-fade"
               style={{
                 color: ink,
-                letterSpacing: "0.06em",
-                fontSize: 28,
+                letterSpacing: "0.08em",
+                fontSize: 32,
                 lineHeight: 1,
+                textShadow: "0 2px 18px rgb(0 0 0 / 0.18)",
               }}
             >
               {color.hex}
@@ -208,10 +212,11 @@ export function ColorWorkspace({
               variant="filled"
               style={{
                 background: contrastOk
-                  ? "rgb(16 185 129 / 0.85)"
-                  : "rgb(239 68 68 / 0.85)",
+                  ? "rgb(16 185 129 / 0.88)"
+                  : "rgb(239 68 68 / 0.88)",
                 color: "#fff",
-                backdropFilter: "blur(6px)",
+                backdropFilter: "blur(8px)",
+                fontWeight: 650,
               }}
             >
               {contrastOk ? labels.contrast.pass : labels.contrast.fail} AA
@@ -240,15 +245,11 @@ export function ColorWorkspace({
         ]}
         radius="md"
         styles={{
-          root: {
-            background: "var(--color-elevated)",
-            border: "1px solid var(--color-hairline)",
-          },
           label: {
             fontSize: 12,
-            fontWeight: 600,
-            paddingTop: 8,
-            paddingBottom: 8,
+            fontWeight: 650,
+            paddingTop: 9,
+            paddingBottom: 9,
           },
         }}
       />
@@ -267,7 +268,7 @@ export function ColorWorkspace({
           </ActionChipRow>
 
           {mode === "eyedropper" ? (
-            <Box className="ink-surface" p="md">
+            <Surface>
               <Stack gap="sm">
                 <Group gap="xs" wrap="wrap" grow>
                   <Button
@@ -275,12 +276,12 @@ export function ColorWorkspace({
                     color={picking ? "orange" : "blue"}
                     variant={picking ? "light" : "filled"}
                     radius="md"
-                    style={{ flex: "1 1 140px" }}
+                    style={{ flex: "1 1 140px", height: 40 }}
                   >
                     {picking ? labels.pickActive : labels.pick}
                   </Button>
                   {picking ? (
-                    <Button variant="default" radius="md" onClick={onStopPick}>
+                    <Button variant="default" radius="md" onClick={onStopPick} style={{ height: 40 }}>
                       {labels.pickCancel}
                     </Button>
                   ) : null}
@@ -294,17 +295,17 @@ export function ColorWorkspace({
                       sample={loupeSample}
                       centerLabel={labels.loupeCenter}
                     />
-                    <Text ta="center" ff="monospace" size="lg" fw={600}>
+                    <Text ta="center" ff="monospace" size="lg" fw={650}>
                       {loupeSample?.hex ?? "—"}
                     </Text>
                   </Stack>
                 ) : null}
               </Stack>
-            </Box>
+            </Surface>
           ) : null}
 
           {mode === "manual" ? (
-            <Box className="ink-surface" p="md">
+            <Surface>
               <Stack gap="md">
                 <HsbPicker
                   color={color}
@@ -319,60 +320,54 @@ export function ColorWorkspace({
                   onChange={onColorChange}
                 />
               </Stack>
-            </Box>
+            </Surface>
           ) : null}
 
           {mode === "image" ? (
-            <Box className="ink-surface" p="md">
+            <Surface>
               <ImageColorPanel onPick={onImagePick} labels={labels.image} />
-            </Box>
+            </Surface>
           ) : null}
 
           <ContrastPanel color={color} labels={labels.contrast} />
 
           {recent.length > 0 ? (
-            <Stack gap={8}>
+            <Stack gap={10}>
               <Group justify="space-between">
-                <Text
-                  size="xs"
-                  c="dimmed"
-                  tt="uppercase"
-                  fw={600}
-                  style={{ letterSpacing: "0.06em" }}
-                >
-                  {labels.recent}
-                </Text>
+                <Text className="ink-section-label">{labels.recent}</Text>
                 <UnstyledButton
                   onClick={onOpenHistory}
                   style={{
                     fontSize: 12,
-                    fontWeight: 600,
+                    fontWeight: 650,
                     color: "var(--color-accent)",
+                    transition: "opacity var(--motion-fast)",
                   }}
                 >
                   {labels.viewAll}
                 </UnstyledButton>
               </Group>
               <Group
-                gap={8}
+                gap={10}
                 wrap="nowrap"
-                style={{ overflowX: "auto", paddingBottom: 4 }}
+                style={{ overflowX: "auto", paddingBottom: 4, paddingTop: 2 }}
               >
                 {recent.map((item) => (
                   <UnstyledButton
                     key={item.id}
+                    className="swatch-chip"
                     onClick={() => onSelectHistory(item)}
                     aria-label={item.color.hex}
                     style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 10,
+                      width: 40,
+                      height: 40,
+                      borderRadius: 12,
                       background: item.color.hex,
                       flexShrink: 0,
                       boxShadow:
                         item.color.hex === color.hex
-                          ? "inset 0 0 0 2px var(--color-accent)"
-                          : "inset 0 0 0 1px var(--color-hairline)",
+                          ? "0 0 0 2px var(--color-base), 0 0 0 4px var(--color-accent)"
+                          : "inset 0 0 0 1px var(--color-hairline), 0 4px 12px rgb(0 0 0 / 0.25)",
                     }}
                   />
                 ))}

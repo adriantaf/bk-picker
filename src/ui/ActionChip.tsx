@@ -11,22 +11,25 @@ export function ActionChip({ label, active = false, onClick }: ActionChipProps) 
   return (
     <UnstyledButton
       onClick={onClick}
+      className="ink-interactive"
       style={{
         flex: 1,
         minWidth: 0,
-        padding: "11px 10px",
-        borderRadius: 12,
+        padding: "12px 10px",
+        borderRadius: 14,
         textAlign: "center",
         fontSize: 13,
-        fontWeight: 600,
+        fontWeight: 650,
         color: active ? "var(--color-text)" : "var(--color-muted)",
         background: active
-          ? "color-mix(in srgb, var(--color-accent) 18%, var(--color-elevated))"
-          : "var(--color-elevated)",
+          ? "color-mix(in srgb, var(--color-accent) 20%, var(--color-elevated))"
+          : "color-mix(in srgb, var(--color-elevated) 80%, transparent)",
         boxShadow: active
-          ? "inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent)"
+          ? "inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 45%, transparent), 0 6px 18px rgb(0 0 0 / 0.2)"
           : "inset 0 0 0 1px var(--color-hairline)",
-        transition: "background-color 140ms ease, color 140ms ease",
+        backdropFilter: "blur(10px)",
+        transition:
+          "background-color var(--motion-fast), color var(--motion-fast), box-shadow var(--motion-fast), transform var(--motion-fast)",
       }}
     >
       {label}

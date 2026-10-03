@@ -11,7 +11,7 @@ type AppShellProps = {
   footer?: ReactNode;
 };
 
-/** Dark shell: left icon rail + scrollable main. */
+/** Dark shell: glass rail + ambient glow + scrollable main. */
 export function AppShell({
   tab,
   onTabChange,
@@ -27,8 +27,9 @@ export function AppShell({
         maxHeight: "100dvh",
         overflow: "hidden",
         background: `
-          radial-gradient(900px 420px at 20% -10%, color-mix(in srgb, var(--active-glow) 28%, transparent), transparent 55%),
-          var(--color-base)
+          radial-gradient(780px 360px at 18% -8%, color-mix(in srgb, var(--active-glow) 32%, transparent), transparent 58%),
+          radial-gradient(520px 280px at 92% 12%, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 55%),
+          linear-gradient(180deg, #0d1016 0%, var(--color-base) 48%, #080a0e 100%)
         `,
         color: "var(--color-text)",
       }}
@@ -48,21 +49,27 @@ export function AppShell({
             flex: 1,
             minHeight: 0,
             overflow: "auto",
-            padding: "16px 18px",
+            padding: "18px 20px 22px",
           }}
-          className="ui-fade"
         >
-          <Box style={{ maxWidth: 520, marginInline: "auto" }}>{children}</Box>
+          <Box
+            key={tab}
+            className="ui-fade"
+            style={{ maxWidth: 540, marginInline: "auto" }}
+          >
+            {children}
+          </Box>
         </Box>
         {footer ? (
           <Box
             px="md"
-            py={8}
+            py={10}
             style={{
               flexShrink: 0,
               borderTop: "1px solid var(--color-hairline)",
-              background: "color-mix(in srgb, var(--color-surface) 80%, transparent)",
-              backdropFilter: "blur(10px)",
+              background: "color-mix(in srgb, var(--color-surface) 65%, transparent)",
+              backdropFilter: "blur(16px) saturate(1.15)",
+              WebkitBackdropFilter: "blur(16px) saturate(1.15)",
             }}
           >
             {footer}

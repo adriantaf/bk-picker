@@ -3,9 +3,9 @@ import { createTheme, rem } from "@mantine/core";
 export const bkTheme = createTheme({
   primaryColor: "blue",
   fontFamily:
-    '"Segoe UI Variable", "Segoe UI", "SF Pro Text", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif',
+    '"SF Pro Text", "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif',
   fontFamilyMonospace:
-    '"Cascadia Mono", "JetBrains Mono", "SF Mono", ui-monospace, Consolas, monospace',
+    '"SF Mono", "Cascadia Mono", "JetBrains Mono", ui-monospace, Consolas, monospace',
   defaultRadius: "md",
   cursorType: "pointer",
   spacing: {
@@ -17,16 +17,16 @@ export const bkTheme = createTheme({
   },
   colors: {
     dark: [
-      "#e8eef6",
+      "#eef2f8",
       "#c5cedc",
-      "#8b97a8",
+      "#8b96a8",
       "#5c687a",
       "#3a4556",
-      "#242c3b",
-      "#1c2330",
-      "#161b22",
+      "#242c3d",
+      "#1a2030",
       "#12161d",
       "#0e1116",
+      "#0a0c10",
     ],
   },
   headings: {
@@ -40,8 +40,9 @@ export const bkTheme = createTheme({
       },
       styles: {
         root: {
+          fontWeight: 600,
           transition:
-            "background-color 140ms ease, transform 140ms ease, box-shadow 140ms ease",
+            "background-color 120ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 120ms cubic-bezier(0.2, 0.8, 0.2, 1)",
         },
       },
     },
@@ -57,14 +58,46 @@ export const bkTheme = createTheme({
         radius: "md",
         size: "xs",
       },
+      styles: {
+        root: {
+          background: "color-mix(in srgb, var(--color-elevated) 80%, transparent)",
+          border: "1px solid var(--color-hairline)",
+          backdropFilter: "blur(12px)",
+        },
+        indicator: {
+          background: "color-mix(in srgb, var(--color-accent) 22%, var(--color-overlay))",
+          boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 35%, transparent)",
+        },
+        label: {
+          fontWeight: 600,
+        },
+      },
     },
     TextInput: {
       defaultProps: {
         radius: "md",
         size: "sm",
       },
+      styles: {
+        input: {
+          background: "color-mix(in srgb, var(--color-elevated) 90%, transparent)",
+          border: "1px solid var(--color-hairline)",
+          color: "var(--color-text)",
+          transition: "border-color 120ms ease, box-shadow 120ms ease",
+        },
+      },
     },
     ActionIcon: {
+      defaultProps: {
+        radius: "md",
+      },
+      styles: {
+        root: {
+          transition: "background-color 120ms ease, transform 120ms ease",
+        },
+      },
+    },
+    Badge: {
       defaultProps: {
         radius: "md",
       },
@@ -72,7 +105,8 @@ export const bkTheme = createTheme({
     Notification: {
       styles: {
         root: {
-          boxShadow: "0 8px 32px rgb(0 0 0 / 0.35)",
+          boxShadow: "0 12px 40px rgb(0 0 0 / 0.4)",
+          backdropFilter: "blur(16px)",
         },
       },
     },

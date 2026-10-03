@@ -1,4 +1,4 @@
-import { Alert, Text } from "@mantine/core";
+import { Text } from "@mantine/core";
 
 type ShortcutBannerProps = {
   label: string;
@@ -12,22 +12,26 @@ export function ShortcutBanner({
   isError,
 }: ShortcutBannerProps) {
   return (
-    <Alert
-      color={isError ? "red" : "gray"}
-      variant="light"
-      p="xs"
-      radius="md"
-      styles={{ message: { fontSize: 11, lineHeight: 1.4 } }}
+    <Text
+      size="xs"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        lineHeight: 1.4,
+        color: isError ? "var(--color-danger)" : "var(--color-muted)",
+      }}
+      role={isError ? "alert" : undefined}
     >
-      <Text span fw={600} size="xs">
+      <Text span fw={650} size="xs" c={isError ? "red" : "var(--color-text)"}>
         {label}
       </Text>
-      <Text span size="xs" mx={6} c="dimmed">
+      <Text span size="xs" c="dimmed">
         ·
       </Text>
       <Text span size="xs">
         {statusText}
       </Text>
-    </Alert>
+    </Text>
   );
 }

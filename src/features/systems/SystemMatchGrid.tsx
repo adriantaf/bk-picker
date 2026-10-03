@@ -40,15 +40,7 @@ export function SystemMatchGrid({
 
         return (
           <Stack key={id} gap="sm">
-            <Text
-              size="xs"
-              c="dimmed"
-              tt="uppercase"
-              fw={600}
-              style={{ letterSpacing: "0.06em" }}
-            >
-              {systemLabel}
-            </Text>
+            <Text className="ink-section-label">{systemLabel}</Text>
             <SimpleGrid cols={1} spacing="sm">
               {matches.map((match) => (
                 <MatchCard

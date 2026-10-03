@@ -28,8 +28,19 @@ export function FormatBar({
   onCopy,
 }: FormatBarProps) {
   return (
-    <Stack gap={10}>
-      <Group gap={6} wrap="wrap">
+    <Stack gap={12}>
+      <Group
+        gap={4}
+        wrap="nowrap"
+        style={{
+          overflowX: "auto",
+          padding: 4,
+          borderRadius: 14,
+          background: "color-mix(in srgb, var(--color-elevated) 75%, transparent)",
+          border: "1px solid var(--color-hairline)",
+          backdropFilter: "blur(12px)",
+        }}
+      >
         {FORMATS.map((format) => {
           const active = value === format;
           return (
@@ -37,15 +48,21 @@ export function FormatBar({
               key={format}
               onClick={() => onFormatChange(format)}
               style={{
-                padding: "5px 10px",
-                borderRadius: 999,
+                flex: "1 0 auto",
+                padding: "7px 10px",
+                borderRadius: 10,
                 fontSize: 11,
-                fontWeight: 600,
+                fontWeight: 650,
                 letterSpacing: "0.02em",
-                color: active ? "#0e1116" : "var(--color-muted)",
-                background: active ? "var(--color-accent)" : "var(--color-elevated)",
-                boxShadow: active ? "none" : "inset 0 0 0 1px var(--color-hairline)",
-                transition: "background-color 140ms ease, color 140ms ease",
+                color: active ? "var(--color-text)" : "var(--color-muted)",
+                background: active
+                  ? "color-mix(in srgb, var(--color-accent) 22%, var(--color-overlay))"
+                  : "transparent",
+                boxShadow: active
+                  ? "inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent)"
+                  : "none",
+                transition:
+                  "background-color var(--motion-fast), color var(--motion-fast), box-shadow var(--motion-fast)",
               }}
             >
               {labels[format]}
@@ -63,13 +80,17 @@ export function FormatBar({
             input: {
               fontFamily: "var(--font-mono)",
               fontSize: 13,
-              background: "var(--color-elevated)",
-              border: "1px solid var(--color-hairline)",
-              color: "var(--color-text)",
+              letterSpacing: "0.02em",
+              height: 40,
             },
           }}
         />
-        <Button onClick={onCopy} radius="md" color="blue">
+        <Button
+          onClick={onCopy}
+          radius="md"
+          color="blue"
+          style={{ height: 40, minWidth: 88, fontWeight: 650 }}
+        >
           {copyLabel}
         </Button>
       </Group>

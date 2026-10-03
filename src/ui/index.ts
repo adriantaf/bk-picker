@@ -11,4 +11,5 @@ export { IconRail } from "./IconRail";
 export { LanguageToggle } from "./LanguageToggle";
 export { MatchCard } from "./MatchCard";
 export { PaletteRow } from "./PaletteRow";
+export { Surface } from "./Surface";
 export { TabBar } from "./TabBar";

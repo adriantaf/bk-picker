@@ -1,6 +1,6 @@
 [package]
 name = "bk-picker"
-version = "1.1.0"
+version = "1.1.1"
 description = "BK Picker — lightweight screen color utility"
 authors = ["Adrian Tafoya"]
 edition = "2021"
