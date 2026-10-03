@@ -3,325 +3,363 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>BK Picker — Adrian Tafoya</title>
+    <title>BK Picker — Color utility for Windows</title>
     <meta
       name="description"
-      content="BK Picker: utilidad de color para Windows. Pipeta, formatos CSS modernos, contraste AA/AAA y tokens de design systems. Por Adrian Tafoya."
+      content="BK Picker is a professional color utility for developers and designers. Screen eyedropper, modern CSS formats, history, favorites, and design-system matches — built with Tauri for Windows."
     />
     <meta property="og:title" content="BK Picker" />
     <meta
       property="og:description"
-      content="Captura colores listos para pegar en código. Windows 10/11."
+      content="Professional color utility for developers and designers. Capture, convert, and match colors on Windows."
     />
-    <meta property="og:image" content="./assets/01-color.png" />
+    <meta property="og:image" content="./assets/logo.svg" />
+    <meta name="theme-color" content="#0a0c10" />
+    <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,500&family=Instrument+Serif:ital@0;1&display=swap"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Outfit:wght@450;550;650;700&display=swap"
       rel="stylesheet"
     />
-    <style>
-      :root {
-        --ink: #14201a;
-        --muted: #4a5c52;
-        --paper: #eef3ef;
-        --panel: #f7faf8;
-        --line: #c5d2cb;
-        --accent: #1f6b4a;
-        --accent-soft: #d8eee4;
-        --glow: #9fd4b8;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      html {
-        scroll-behavior: smooth;
-      }
-
-      body {
-        margin: 0;
-        color: var(--ink);
-        font-family: "DM Sans", system-ui, sans-serif;
-        background:
-          radial-gradient(900px 420px at 12% -8%, var(--glow), transparent 60%),
-          radial-gradient(700px 380px at 100% 0%, #cfe0d8 0%, transparent 55%),
-          linear-gradient(180deg, #f4f8f5 0%, var(--paper) 45%, #e6efe9 100%);
-        min-height: 100vh;
-      }
-
-      .wrap {
-        width: min(1080px, calc(100% - 2rem));
-        margin: 0 auto;
-        padding: 2.5rem 0 4.5rem;
-      }
-
-      .hero {
-        display: grid;
-        gap: 1.25rem;
-        padding: 1.5rem 0 2.5rem;
-        animation: rise 0.7s ease both;
-      }
-
-      .brand {
-        font-family: "Instrument Serif", Georgia, serif;
-        font-size: clamp(3rem, 9vw, 5.4rem);
-        line-height: 0.95;
-        letter-spacing: -0.02em;
-        margin: 0;
-      }
-
-      .lead {
-        max-width: 34rem;
-        margin: 0;
-        font-size: 1.125rem;
-        line-height: 1.55;
-        color: var(--muted);
-      }
-
-      .actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        margin-top: 0.5rem;
-      }
-
-      a.btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 2.75rem;
-        padding: 0 1.15rem;
-        border-radius: 0.65rem;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 0.95rem;
-        transition: transform 0.15s ease, background-color 0.15s ease;
-      }
-
-      a.btn:hover {
-        transform: translateY(-1px);
-      }
-
-      .btn-primary {
-        background: var(--accent);
-        color: #f4fff9;
-      }
-
-      .btn-ghost {
-        background: transparent;
-        color: var(--ink);
-        border: 1px solid var(--line);
-      }
-
-      .author {
-        margin: 0;
-        font-size: 0.95rem;
-        color: var(--muted);
-      }
-
-      .author a {
-        color: var(--accent);
-        font-weight: 600;
-        text-decoration: none;
-      }
-
-      .author a:hover {
-        text-decoration: underline;
-      }
-
-      .shots {
-        margin-top: 1.5rem;
-        display: grid;
-        gap: 1rem;
-        animation: rise 0.85s 0.08s ease both;
-      }
-
-      .shot {
-        margin: 0;
-        border-radius: 1rem;
-        overflow: hidden;
-        border: 1px solid var(--line);
-        background: var(--panel);
-        box-shadow: 0 18px 40px rgb(20 32 26 / 0.08);
-      }
-
-      .shot img {
-        display: block;
-        width: 100%;
-        height: auto;
-        vertical-align: middle;
-      }
-
-      .shot-app {
-        max-width: 420px;
-        margin-inline: auto;
-      }
-
-      .grid-2 .shot-app {
-        max-width: none;
-      }
-
-      .shot figcaption {
-        padding: 0.75rem 1rem 1rem;
-        font-size: 0.9rem;
-        color: var(--muted);
-      }
-
-      .grid-2 {
-        display: grid;
-        gap: 1rem;
-        grid-template-columns: 1fr;
-      }
-
-      @media (min-width: 760px) {
-        .grid-2 {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
-
-      .features {
-        margin-top: 2.5rem;
-        display: grid;
-        gap: 0.85rem;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        animation: rise 0.9s 0.12s ease both;
-      }
-
-      .feature {
-        padding: 1rem 1.05rem;
-        border-radius: 0.85rem;
-        border: 1px solid var(--line);
-        background: color-mix(in srgb, var(--panel) 88%, white);
-      }
-
-      .feature h2 {
-        margin: 0 0 0.35rem;
-        font-size: 1rem;
-      }
-
-      .feature p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 0.92rem;
-        line-height: 1.45;
-      }
-
-      footer {
-        margin-top: 3rem;
-        padding-top: 1.25rem;
-        border-top: 1px solid var(--line);
-        color: var(--muted);
-        font-size: 0.9rem;
-      }
-
-      footer a {
-        color: var(--accent);
-        text-decoration: none;
-        font-weight: 600;
-      }
-
-      @keyframes rise {
-        from {
-          opacity: 0;
-          transform: translateY(12px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="wrap">
-      <section class="hero">
-        <h1 class="brand">BK Picker</h1>
-        <p class="lead">
-          Captura un color de la pantalla o de una imagen y cópialo listo para
-          pegar en CSS o Figma: HEX, OKLCH, HSL moderno, tokens y contraste AA/AAA.
-        </p>
-        <div class="actions">
-          <a
-            class="btn btn-primary"
-            href="https://github.com/adriantaf/bk-picker/releases/latest"
-          >
-            Descargar para Windows
-          </a>
+    <header class="nav">
+      <div class="container nav-inner">
+        <a class="brand" href="#top" aria-label="BK Picker home">
+          <img src="./assets/logo.svg" width="36" height="36" alt="" />
+          <span>BK Picker</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a class="hide-sm" href="#features">Features</a>
+          <a class="hide-sm" href="#showcase">Showcase</a>
+          <a class="hide-sm" href="#developers">Developers</a>
           <a
             class="btn btn-ghost"
             href="https://github.com/adriantaf/bk-picker"
+            target="_blank"
+            rel="noopener noreferrer"
+            >GitHub</a
           >
-            Ver en GitHub
-          </a>
+          <a
+            class="btn btn-primary"
+            href="https://github.com/adriantaf/bk-picker/releases/latest"
+            >Download</a
+          >
+        </nav>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="container hero">
+        <div>
+          <p class="eyebrow">Windows · Tauri · Ink Surface</p>
+          <h1>Professional color utility for code and design</h1>
+          <p class="hero-lead">
+            Capture screen colors, copy modern CSS formats, and match Tailwind,
+            Material, CSS, and Bootstrap tokens — in a native desktop app that
+            stays out of your way.
+          </p>
+          <div class="hero-actions">
+            <a
+              class="btn btn-primary btn-lg"
+              href="https://github.com/adriantaf/bk-picker/releases/latest"
+              >Download for Windows</a
+            >
+            <a
+              class="btn btn-ghost btn-lg"
+              href="https://github.com/adriantaf/bk-picker"
+              target="_blank"
+              rel="noopener noreferrer"
+              >View on GitHub</a
+            >
+          </div>
+          <div class="hero-meta">
+            <span><strong>Alt+C</strong> global shortcut</span>
+            <span><strong>HEX · RGB · HSL · OKLCH</strong></span>
+            <span><strong>Free &amp; open source</strong></span>
+          </div>
         </div>
-        <p class="author">
-          Por
-          <a href="https://adriantaf.github.io">Adrian Tafoya</a>
-          · Windows 10/11 · atajo <code>Alt+C</code>
-        </p>
-      </section>
 
-      <section class="shots" aria-label="Capturas reales de BK Picker">
-        <figure class="shot shot-app">
-          <img
-            src="./assets/01-color.png"
-            alt="BK Picker: pestaña Color con color activo, Pipeta y Manual"
-            width="416"
-            height="659"
-          />
-          <figcaption>Color activo, pipeta o ajuste manual, formatos y contraste</figcaption>
-        </figure>
-        <div class="grid-2">
-          <figure class="shot shot-app">
-            <img
-              src="./assets/02-image.png"
-              alt="BK Picker: pestaña Imagen con arrastrar, pegar y URL"
-              width="416"
-              height="659"
-            />
-            <figcaption>Muestreo desde imagen: archivo, URL, arrastrar o Ctrl+V</figcaption>
-          </figure>
-          <figure class="shot shot-app">
-            <img
-              src="./assets/03-settings.png"
-              alt="BK Picker: pestaña Ajustes con idioma y atajo"
-              width="416"
-              height="659"
-            />
-            <figcaption>Idioma, atajo global y siempre visible</figcaption>
-          </figure>
+        <div class="mock-stage" aria-hidden="true">
+          <div class="mock-glow" id="mock-glow"></div>
+          <div class="mock-window" id="mock-window" style="--mock-color: #3b82f6">
+            <aside class="mock-rail">
+              <span class="active">◆</span>
+              <span>◈</span>
+              <span>⚙</span>
+            </aside>
+            <div class="mock-main">
+              <div class="mock-hero">
+                <div class="mock-hex" id="mock-hex">#3B82F6</div>
+              </div>
+              <div class="mock-formats">
+                <i class="on">HEX</i>
+                <i>RGB</i>
+                <i>HSL</i>
+                <i>OKLCH</i>
+                <i>HEX+A</i>
+              </div>
+              <div class="mock-row">
+                <div class="mock-chip on">Pipeta</div>
+                <div class="mock-chip">Manual</div>
+                <div class="mock-chip">Imagen</div>
+              </div>
+              <div class="mock-cards">
+                <div class="mock-card">
+                  <div class="mock-swatch" style="background: #3b82f6"></div>
+                  <div>
+                    <small>Tailwind</small>
+                    <strong>blue-500</strong>
+                    <code>bg-blue-500</code>
+                  </div>
+                </div>
+                <div class="mock-card">
+                  <div class="mock-swatch" style="background: #2196f3"></div>
+                  <div>
+                    <small>Material</small>
+                    <strong>Blue 500</strong>
+                    <code>ΔE 1.2</code>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section class="features" aria-label="Funciones">
-        <article class="feature">
-          <h2>Pipeta + lupa</h2>
-          <p>Atajo global para captura rápida, o modo preciso con lupa.</p>
-        </article>
-        <article class="feature">
-          <h2>Formatos de código</h2>
-          <p>HEX, HEX+A, RGB, HSL moderno y OKLCH en un clic.</p>
-        </article>
-        <article class="feature">
-          <h2>Sistemas</h2>
-          <p>Matches Tailwind, Material, CSS named y Bootstrap.</p>
-        </article>
-        <article class="feature">
-          <h2>Imagen</h2>
-          <p>Archivo, URL, arrastrar o pegar desde el portapapeles.</p>
-        </article>
+      <section id="features" class="container">
+        <div class="section-head reveal">
+          <h2>Everything you need to work with color in production</h2>
+          <p>
+            Built for the moment between inspiration and implementation — when
+            you need the right token, format, and contrast without leaving your
+            flow.
+          </p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature reveal">
+            <div class="feature-icon">◎</div>
+            <h3>Screen eyedropper</h3>
+            <p>
+              Pick any pixel on screen with a loupe preview. Global shortcut
+              ready when the app is in the background.
+            </p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature-icon">{ }</div>
+            <h3>Modern CSS formats</h3>
+            <p>
+              Copy HEX, HEX+A, RGB, HSL, modern HSL, and OKLCH — formatted for
+              paste into code, design tokens, or stylesheets.
+            </p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature-icon">◈</div>
+            <h3>History &amp; favorites</h3>
+            <p>
+              Keep recent captures close. Pin favorites, search, and export as
+              CSS variables or JSON.
+            </p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature-icon">▣</div>
+            <h3>Design system matches</h3>
+            <p>
+              See the closest Tailwind, Material, CSS named, and Bootstrap
+              tokens with ΔE distance — pick the variant that fits.
+            </p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature-icon">◐</div>
+            <h3>Palettes on demand</h3>
+            <p>
+              Complementary, analogous, and triadic sets derived from your
+              active color — activate and copy in one tap.
+            </p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature-icon">✓</div>
+            <h3>Contrast checks</h3>
+            <p>
+              Instant WCAG AA/AAA feedback against white and black so readable
+              UI choices stay intentional.
+            </p>
+          </article>
+        </div>
       </section>
 
-      <footer>
-        Copyright © Adrian Tafoya ·
-        <a href="https://adriantaf.github.io">adriantaf.github.io</a>
-        ·
-        <a href="https://github.com/adriantaf/bk-picker/releases/latest"
-          >Releases</a
-        >
-      </footer>
+      <section id="showcase" class="container">
+        <div class="section-head reveal">
+          <h2>Designed around the active color</h2>
+          <p>
+            The workspace keeps your color in focus while capture modes,
+            equivalences, and palettes stay one tab away.
+          </p>
+        </div>
+        <div class="showcase">
+          <div class="showcase-row reveal">
+            <figure class="shot">
+              <img
+                src="./assets/01-color.png"
+                alt="BK Picker color workspace with active color and formats"
+                width="960"
+                height="640"
+                loading="lazy"
+              />
+            </figure>
+            <div class="showcase-copy">
+              <h3>Capture, format, ship</h3>
+              <p>
+                Eyedropper, manual HSB, or image sampling — then copy the format
+                your stack expects without reformatting by hand.
+              </p>
+              <div class="pill-list">
+                <span>Pipeta</span>
+                <span>Manual</span>
+                <span>Imagen</span>
+                <span>OKLCH</span>
+              </div>
+            </div>
+          </div>
+          <div class="showcase-row reverse reveal">
+            <figure class="shot">
+              <img
+                src="./assets/02-image.png"
+                alt="BK Picker image color sampling panel"
+                width="960"
+                height="640"
+                loading="lazy"
+              />
+            </figure>
+            <div class="showcase-copy">
+              <h3>Sample from images</h3>
+              <p>
+                Drop a file, paste from the clipboard, or load a URL. Click any
+                pixel to activate and copy the color instantly.
+              </p>
+              <div class="pill-list">
+                <span>Drag &amp; drop</span>
+                <span>URL</span>
+                <span>Ctrl+V</span>
+              </div>
+            </div>
+          </div>
+          <div class="showcase-row reveal">
+            <figure class="shot">
+              <img
+                src="./assets/03-settings.png"
+                alt="BK Picker settings for language, shortcut, and always on top"
+                width="960"
+                height="640"
+                loading="lazy"
+              />
+            </figure>
+            <div class="showcase-copy">
+              <h3>Tuned for your desk</h3>
+              <p>
+                Language, global shortcut presets, and always-on-top — small
+                controls that keep BK Picker feeling native on Windows.
+              </p>
+              <div class="pill-list">
+                <span>ES / EN</span>
+                <span>Always on top</span>
+                <span>Shortcuts</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="developers" class="container">
+        <div class="section-head reveal">
+          <h2>Native feel. Developer DNA.</h2>
+          <p>
+            Lightweight Tauri shell, WebView2 on Windows, and a workflow that
+            respects how you actually ship UI.
+          </p>
+        </div>
+        <div class="dev-panel reveal">
+          <div>
+            <div class="dev-stats">
+              <div class="stat">
+                <strong>Tauri 2</strong>
+                <span>Native desktop performance with a small footprint.</span>
+              </div>
+              <div class="stat">
+                <strong>Win 10/11</strong>
+                <span>Built for the platform you already work on.</span>
+              </div>
+              <div class="stat">
+                <strong>Design systems</strong>
+                <span>Tailwind, Material, CSS, Bootstrap matches.</span>
+              </div>
+              <div class="stat">
+                <strong>Open source</strong>
+                <span>Inspect, fork, and contribute on GitHub.</span>
+              </div>
+            </div>
+          </div>
+          <pre class="code-card" aria-label="Example copied color values"><code><span class="c-muted">// From BK Picker → your stylesheet</span>
+<span class="c-accent">--brand</span>: <span class="c-ok">oklch(62% 0.19 255)</span>;
+<span class="c-accent">.btn</span> {
+  background: <span class="c-ok">bg-blue-500</span>;
+}</code></pre>
+        </div>
+      </section>
+
+      <section class="container">
+        <div class="download reveal" id="download">
+          <h2>Install BK Picker</h2>
+          <p>
+            Get the latest Windows build from GitHub Releases — NSIS setup or
+            MSI. WebView2 is required (most systems already have it).
+          </p>
+          <div class="download-actions">
+            <a
+              class="btn btn-primary btn-lg"
+              href="https://github.com/adriantaf/bk-picker/releases/latest"
+              >Download latest release</a
+            >
+            <a
+              class="btn btn-ghost btn-lg"
+              href="https://github.com/adriantaf/bk-picker"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Star on GitHub</a
+            >
+          </div>
+          <p class="download-note">
+            Prefer MSI for managed installs · EXE setup for quick personal use
+          </p>
+        </div>
+      </section>
     </main>
+
+    <footer class="footer">
+      <div class="container footer-inner">
+        <div>
+          Created by
+          <a href="https://adriantaf.github.io" target="_blank" rel="noopener noreferrer"
+            >Adrian Tafoya</a
+          >
+        </div>
+        <div>
+          <a href="https://github.com/adriantaf/bk-picker/releases/latest"
+            >Releases</a
+          >
+          ·
+          <a
+            href="https://github.com/adriantaf/bk-picker"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Source</a
+          >
+        </div>
+      </div>
+    </footer>
+
+    <script src="./main.js" defer></script>
   </body>
 </html>
