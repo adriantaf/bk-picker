@@ -1,7 +1,15 @@
-import { Box } from "@mantine/core";
 import type { ReactNode } from "react";
+import {
+  AppShell as MantineAppShell,
+  Box,
+  Image,
+  Text,
+} from "@mantine/core";
+import brandLogo from "@/assets/brand-logo.svg";
 import { IconRail } from "./IconRail";
+import { PageTransition } from "./PageMotion";
 import type { AppTab } from "@/types";
+import classes from "./AppShell.module.css";
 
 type AppShellProps = {
   tab: AppTab;
@@ -11,7 +19,10 @@ type AppShellProps = {
   footer?: ReactNode;
 };
 
-/** Dark shell: glass rail + ambient glow + scrollable main. */
+/**
+ * Desktop shell: Mantine AppShell + mica navbar + animated main pane.
+ * Fluent acrylic surfaces + macOS-like spacing.
+ */
 export function AppShell({
   tab,
   onTabChange,
@@ -20,62 +31,51 @@ export function AppShell({
   footer,
 }: AppShellProps) {
   return (
-    <Box
-      style={{
-        display: "flex",
-        height: "100dvh",
-        maxHeight: "100dvh",
-        overflow: "hidden",
-        background: `
-          radial-gradient(780px 360px at 18% -8%, color-mix(in srgb, var(--active-glow) 32%, transparent), transparent 58%),
-          radial-gradient(520px 280px at 92% 12%, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 55%),
-          linear-gradient(180deg, #0d1016 0%, var(--color-base) 48%, #080a0e 100%)
-        `,
-        color: "var(--color-text)",
-      }}
+    <MantineAppShell
+      className={classes.shell}
+      navbar={{ width: 56, breakpoint: 0 }}
+      footer={footer ? { height: 46 } : undefined}
+      padding={0}
+      withBorder={false}
     >
-      <IconRail value={tab} onChange={onTabChange} labels={tabLabels} />
-      <Box
-        style={{
-          flex: 1,
-          minWidth: 0,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
+      <MantineAppShell.Navbar className={classes.navbar} p={0} withBorder={false}>
+        <Box className={classes.brand} aria-hidden>
+          <Image src={brandLogo} alt="" w={36} h={36} fit="contain" />
+        </Box>
+        <IconRail value={tab} onChange={onTabChange} labels={tabLabels} />
+        <Box style={{ flex: 1 }} />
+        <Text
+          size="10px"
+          c="dimmed"
+          ta="center"
+          px={4}
+          style={{ letterSpacing: "0.04em", opacity: 0.55 }}
+        >
+          BK
+        </Text>
+      </MantineAppShell.Navbar>
+
+      <MantineAppShell.Main className={classes.main}>
         <Box
+          px={20}
+          py={18}
           style={{
-            flex: 1,
-            minHeight: 0,
+            height: "100%",
             overflow: "auto",
-            padding: "18px 20px 22px",
+            minHeight: 0,
           }}
         >
-          <Box
-            key={tab}
-            className="ui-fade"
-            style={{ maxWidth: 540, marginInline: "auto" }}
-          >
-            {children}
+          <Box className={classes.mainInner}>
+            <PageTransition pageKey={tab}>{children}</PageTransition>
           </Box>
         </Box>
-        {footer ? (
-          <Box
-            px="md"
-            py={10}
-            style={{
-              flexShrink: 0,
-              borderTop: "1px solid var(--color-hairline)",
-              background: "color-mix(in srgb, var(--color-surface) 65%, transparent)",
-              backdropFilter: "blur(16px) saturate(1.15)",
-              WebkitBackdropFilter: "blur(16px) saturate(1.15)",
-            }}
-          >
-            {footer}
-          </Box>
-        ) : null}
-      </Box>
-    </Box>
+      </MantineAppShell.Main>
+
+      {footer ? (
+        <MantineAppShell.Footer className={classes.footer} px="md" py={10} withBorder={false}>
+          {footer}
+        </MantineAppShell.Footer>
+      ) : null}
+    </MantineAppShell>
   );
 }

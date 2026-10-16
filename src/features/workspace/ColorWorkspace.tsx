@@ -21,6 +21,7 @@ import { SystemMatchGrid } from "@/features/systems/SystemMatchGrid";
 import { contrastReport, contrastingInk, formatColor } from "@/lib/color";
 import { ActionChip, ActionChipRow } from "@/ui/ActionChip";
 import { FormatBar } from "@/ui/FormatBar";
+import { PageTransition } from "@/ui/PageMotion";
 import { Surface } from "@/ui/Surface";
 import type {
   Color,
@@ -255,7 +256,8 @@ export function ColorWorkspace({
       />
 
       {sessionTab === "capture" ? (
-        <Stack gap="md" className="ui-fade" key="capture">
+        <PageTransition pageKey="capture">
+        <Stack gap="md">
           <ActionChipRow>
             {(["eyedropper", "manual", "image"] as const).map((m) => (
               <ActionChip
@@ -375,10 +377,11 @@ export function ColorWorkspace({
             </Stack>
           ) : null}
         </Stack>
+        </PageTransition>
       ) : null}
 
       {sessionTab === "equivalences" ? (
-        <Box className="ui-fade" key="equivalences">
+        <PageTransition pageKey="equivalences">
           <SystemMatchGrid
             color={color}
             exactLabel={labels.systemsExact}
@@ -390,11 +393,11 @@ export function ColorWorkspace({
             onCopyBoth={onCopySystemBoth}
             onSelect={onSelectSystemHex}
           />
-        </Box>
+        </PageTransition>
       ) : null}
 
       {sessionTab === "palettes" ? (
-        <Box className="ui-fade" key="palettes">
+        <PageTransition pageKey="palettes">
           <PalettePanel
             color={color}
             copyFormat={copyFormat}
@@ -403,7 +406,7 @@ export function ColorWorkspace({
             onExport={onExportPalette}
             labels={labels.palette}
           />
-        </Box>
+        </PageTransition>
       ) : null}
     </Stack>
   );

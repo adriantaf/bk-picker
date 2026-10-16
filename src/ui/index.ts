@@ -10,6 +10,8 @@ export { HistoryCard } from "./HistoryCard";
 export { IconRail } from "./IconRail";
 export { LanguageToggle } from "./LanguageToggle";
 export { MatchCard } from "./MatchCard";
+export { FadeIn, PageTransition, ScalePresence } from "./PageMotion";
 export { PaletteRow } from "./PaletteRow";
 export { Surface } from "./Surface";
 export { TabBar } from "./TabBar";
+export { fadeSlide, motionEase, railItem, scaleIn } from "./motion";

@@ -6,3 +6,10 @@ src-tauri/target/
 *.local
 .vscode/*
 !.vscode/extensions.json
+
+# Development certificate
+devcert.pfx
+
+# MSIX staging / output (binaries; upload via GitHub Release)
+store/msix-stage/
+store/msix/

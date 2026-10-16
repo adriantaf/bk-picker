@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="BK Picker">
+  <defs>
+    <linearGradient id="bk-arc" x1="10" y1="12" x2="54" y2="52" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7EB0FF"/>
+      <stop offset="0.48" stop-color="#5EEAD4"/>
+      <stop offset="1" stop-color="#F472B6"/>
+    </linearGradient>
+    <linearGradient id="bk-core" x1="26" y1="22" x2="40" y2="38" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4F7FB"/>
+      <stop offset="1" stop-color="#A8C0DE"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#12161D"/>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="14.5" stroke="url(#bk-arc)" stroke-opacity="0.5" stroke-width="1.5"/>
+  <path d="M32 12.5c-7.4 0-13.4 5.9-13.4 13.1 0 8.6 9.6 17.9 12.4 20.2a1.5 1.5 0 0 0 2 0c2.8-2.3 12.4-11.6 12.4-20.2 0-7.2-6-13.1-13.4-13.1Z" fill="url(#bk-arc)"/>
+  <circle cx="32" cy="25.8" r="6.8" fill="#0A0C10"/>
+  <circle cx="32" cy="25.8" r="3.6" fill="url(#bk-core)"/>
+  <path d="M41 39.5 46.2 44.7" stroke="#EEF2F8" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M44.4 43c1.6 1.6 1.6 4.1 0 5.7s-4.1 1.6-5.7 0" stroke="#EEF2F8" stroke-width="2.2" stroke-linecap="round"/>
+</svg>

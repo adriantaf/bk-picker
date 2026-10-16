@@ -6,6 +6,8 @@ import {
   Text,
   ThemeIcon,
 } from "@mantine/core";
+import { AnimatePresence, motion } from "framer-motion";
+import { scaleIn } from "@/ui/motion";
 
 type OnboardingModalProps = {
   opened: boolean;
@@ -35,35 +37,44 @@ export function OnboardingModal({
           {labels.title}
         </Text>
       }
-      centered
-      radius="md"
-      overlayProps={{ backgroundOpacity: 0.45, blur: 2 }}
+      radius="lg"
+      transitionProps={{ transition: "pop", duration: 180 }}
     >
-      <Stack gap="md">
-        <Text size="sm" c="dimmed">
-          {labels.body}
-        </Text>
-        <List
-          spacing="sm"
-          size="sm"
-          center
-          icon={
-            <ThemeIcon color="blue" size={18} radius="xl" variant="light">
-              <Text size="10px" fw={700}>
-                •
+      <AnimatePresence>
+        {opened ? (
+          <motion.div
+            initial={scaleIn.initial}
+            animate={scaleIn.animate}
+            transition={scaleIn.transition}
+          >
+            <Stack gap="md">
+              <Text size="sm" c="dimmed" style={{ lineHeight: 1.5 }}>
+                {labels.body}
               </Text>
-            </ThemeIcon>
-          }
-        >
-          <List.Item>{labels.itemShortcut}</List.Item>
-          <List.Item>{labels.itemEyedropper}</List.Item>
-          <List.Item>{labels.itemImage}</List.Item>
-          <List.Item>{labels.itemSystems}</List.Item>
-        </List>
-        <Button fullWidth onClick={onClose}>
-          {labels.cta}
-        </Button>
-      </Stack>
+              <List
+                spacing="sm"
+                size="sm"
+                center
+                icon={
+                  <ThemeIcon color="blue" size={18} radius="xl" variant="light">
+                    <Text size="10px" fw={700}>
+                      •
+                    </Text>
+                  </ThemeIcon>
+                }
+              >
+                <List.Item>{labels.itemShortcut}</List.Item>
+                <List.Item>{labels.itemEyedropper}</List.Item>
+                <List.Item>{labels.itemImage}</List.Item>
+                <List.Item>{labels.itemSystems}</List.Item>
+              </List>
+              <Button fullWidth onClick={onClose} radius="md">
+                {labels.cta}
+              </Button>
+            </Stack>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </Modal>
   );
 }

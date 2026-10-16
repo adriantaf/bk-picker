@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { Box } from "@mantine/core";
+import { Paper } from "@mantine/core";
 
 type SurfaceProps = {
   children: ReactNode;
@@ -10,7 +10,7 @@ type SurfaceProps = {
   interactive?: boolean;
 };
 
-/** Consistent Ink Surface panel primitive. */
+/** Layered surface primitive (mica / elevated / plain). */
 export function Surface({
   children,
   variant = "glass",
@@ -19,21 +19,37 @@ export function Surface({
   style,
   interactive = false,
 }: SurfaceProps) {
-  const base =
-    variant === "elevated"
-      ? "ink-elevated"
-      : variant === "glass"
-        ? "ink-surface"
-        : undefined;
+  if (variant === "plain") {
+    return (
+      <div className={className} style={{ padding, ...style }}>
+        {children}
+      </div>
+    );
+  }
 
   return (
-    <Box
-      className={[base, interactive ? "ink-interactive" : "", className]
+    <Paper
+      className={[
+        variant === "glass" ? "ink-surface" : "ink-elevated",
+        interactive ? "ink-interactive" : "",
+        className,
+      ]
         .filter(Boolean)
         .join(" ")}
-      style={{ padding, ...style }}
+      p={padding}
+      radius={variant === "glass" ? "lg" : "md"}
+      style={{
+        ...(variant === "glass"
+          ? {
+              background: "color-mix(in srgb, var(--color-surface) 72%, transparent)",
+              backdropFilter: "blur(18px) saturate(1.2)",
+              WebkitBackdropFilter: "blur(18px) saturate(1.2)",
+            }
+          : undefined),
+        ...style,
+      }}
     >
       {children}
-    </Box>
+    </Paper>
   );
 }
