@@ -43,6 +43,11 @@ type ColorWorkspaceProps = {
   picking: boolean;
   loupeSample: LoupeUpdate | null;
   history: HistoryItem[];
+  /** Optional controlled session tab (used by Store screenshot harness). */
+  sessionTab?: SessionTab;
+  onSessionTabChange?: (tab: SessionTab) => void;
+  /** Optional sample image URL for Store screenshots. */
+  demoImageUrl?: string | null;
   onColorChange: (color: Color) => void;
   onFormatChange: (format: ColorFormat) => void;
   onCopy: () => Promise<void>;
@@ -123,6 +128,9 @@ export function ColorWorkspace({
   picking,
   loupeSample,
   history,
+  sessionTab: sessionTabProp,
+  onSessionTabChange,
+  demoImageUrl = null,
   onColorChange,
   onFormatChange,
   onCopy,
@@ -138,7 +146,15 @@ export function ColorWorkspace({
   onExportPalette,
   labels,
 }: ColorWorkspaceProps) {
-  const [sessionTab, setSessionTab] = useState<SessionTab>("capture");
+  const [sessionTabInternal, setSessionTabInternal] =
+    useState<SessionTab>("capture");
+  const sessionTab = sessionTabProp ?? sessionTabInternal;
+  const setSessionTab = (tab: SessionTab) => {
+    onSessionTabChange?.(tab);
+    if (sessionTabProp === undefined) {
+      setSessionTabInternal(tab);
+    }
+  };
   const ink = contrastingInk(color);
   const recent = history.slice(0, 8);
   const contrast = contrastReport(color);
@@ -327,7 +343,11 @@ export function ColorWorkspace({
 
           {mode === "image" ? (
             <Surface>
-              <ImageColorPanel onPick={onImagePick} labels={labels.image} />
+              <ImageColorPanel
+                onPick={onImagePick}
+                labels={labels.image}
+                demoImageUrl={demoImageUrl}
+              />
             </Surface>
           ) : null}
 

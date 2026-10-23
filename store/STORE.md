@@ -57,6 +57,8 @@ Use copy from `store/listing/es.md` and `store/listing/en.md`.
 
 ## Screenshots (order)
 
+Regenerate: `npm run capture:store` → `store/listing/screenshots/*.png` (1920×1080).
+
 1. Color tab (Manual) with HSB + HEX  
 2. Eyedropper with loupe  
 3. Image mode  
