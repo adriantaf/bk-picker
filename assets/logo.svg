@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none" role="img" aria-label="BK Picker">
+  <defs>
+    <linearGradient id="bk-arc" x1="160" y1="180" x2="860" y2="820" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7EB0FF"/>
+      <stop offset="0.48" stop-color="#5EEAD4"/>
+      <stop offset="1" stop-color="#F472B6"/>
+    </linearGradient>
+    <linearGradient id="bk-core" x1="400" y1="320" x2="640" y2="560" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4F7FB"/>
+      <stop offset="1" stop-color="#A8C0DE"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="240" fill="#12161D"/>
+  <rect x="28" y="28" width="968" height="968" rx="220" stroke="url(#bk-arc)" stroke-opacity="0.5" stroke-width="28"/>
+  <path d="M512 210c-118 0-214 94-214 210 0 138 154 286 199 323a22 22 0 0 0 30 0c45-37 199-185 199-323 0-116-96-210-214-210Z" fill="url(#bk-arc)"/>
+  <circle cx="512" cy="420" r="108" fill="#0A0C10"/>
+  <circle cx="512" cy="420" r="58" fill="url(#bk-core)"/>
+  <path d="M656 628 748 720" stroke="#EEF2F8" stroke-width="44" stroke-linecap="round"/>
+  <path d="M724 696c24 24 24 62 0 86s-62 24-86 0" stroke="#EEF2F8" stroke-width="36" stroke-linecap="round"/>
+</svg>
