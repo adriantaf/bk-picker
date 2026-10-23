@@ -1,8 +1,12 @@
 # Screenshots checklist
 
-Put final PNGs here before Store submission. Landing shots live in `docs/assets/`.
+Generated PNGs for Microsoft Store (1920×1080). Landing shots live in `docs/assets/`.
 
-Recommended size: **1920×1080** or at least **1366×768**.
+Regenerate:
+
+```bash
+npm run capture:store
+```
 
 | File | Shot |
 |---|---|
@@ -11,10 +15,10 @@ Recommended size: **1920×1080** or at least **1366×768**.
 | `03-image.png` | Image mode with a sample photo |
 | `04-history.png` | History + favorites |
 | `05-palettes.png` | Palettes tab |
-| `06-systems.png` | Systems tab (Tailwind / Material matches) |
+| `06-systems.png` | Systems / equivalences (Tailwind matches) |
 | `07-settings.png` | Settings with language + Adrian Tafoya |
 
 Tips:
-- Use the **light** UI as-is (current brand look).
-- Avoid cluttered desktop backgrounds behind the window.
-- Crop tightly around the app when possible.
+- Captures use the **current dark** UI framed on a clean desktop at **1920×1080**.
+- Do not crop away the window chrome; Partner Center expects full screenshots.
+- Source harness: `?storeShot=1` + `scripts/capture-store-screenshots.mjs`.

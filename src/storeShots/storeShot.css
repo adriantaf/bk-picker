@@ -1,0 +1,107 @@
+html.store-shot {
+  --app-shell-height: 100%;
+}
+
+html.store-shot,
+html.store-shot body,
+html.store-shot #root {
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+html.store-shot body {
+  margin: 0;
+}
+
+.store-shot-desktop {
+  width: 1920px;
+  height: 1080px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(ellipse 90% 70% at 18% 12%, rgb(59 130 246 / 0.28), transparent 55%),
+    radial-gradient(ellipse 70% 60% at 88% 78%, rgb(244 63 94 / 0.18), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 60% 30%, rgb(16 185 129 / 0.12), transparent 45%),
+    linear-gradient(145deg, #0b1020 0%, #121826 42%, #0a0d14 100%);
+  position: relative;
+}
+
+.store-shot-desktop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, black 35%, transparent 78%);
+  pointer-events: none;
+}
+
+.store-shot-window {
+  width: 480px;
+  height: 820px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  background: #0a0c10;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  box-shadow:
+    0 40px 100px rgb(0 0 0 / 0.55),
+    0 0 0 1px rgb(255 255 255 / 0.04),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
+  display: flex;
+  flex-direction: column;
+}
+
+.store-shot-titlebar {
+  height: 36px;
+  flex: 0 0 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 14px;
+  background: linear-gradient(180deg, #1a2030, #12161d);
+  border-bottom: 1px solid rgb(255 255 255 / 0.07);
+}
+
+.store-shot-title {
+  font-family: "Outfit", "Segoe UI Variable", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #c5cedc;
+}
+
+.store-shot-win-controls {
+  display: flex;
+  height: 100%;
+}
+
+.store-shot-win-controls button {
+  width: 46px;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: #c5cedc;
+  font-size: 10px;
+  line-height: 1;
+  cursor: default;
+}
+
+.store-shot-win-controls button:last-child:hover {
+  background: #e81123;
+  color: #fff;
+}
+
+.store-shot-content {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.store-shot-content > * {
+  height: 100%;
+}

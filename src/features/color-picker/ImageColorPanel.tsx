@@ -23,6 +23,8 @@ import type { Color } from "@/types";
 
 type ImageColorPanelProps = {
   onPick: (color: Color) => void;
+  /** When set, auto-loads this image (Store screenshot harness). */
+  demoImageUrl?: string | null;
   labels: {
     chooseFile: string;
     urlPlaceholder: string;
@@ -40,7 +42,11 @@ type ImageColorPanelProps = {
   };
 };
 
-export function ImageColorPanel({ onPick, labels }: ImageColorPanelProps) {
+export function ImageColorPanel({
+  onPick,
+  labels,
+  demoImageUrl = null,
+}: ImageColorPanelProps) {
   const displayRef = useRef<HTMLCanvasElement>(null);
   const sampleRef = useRef<{
     canvas: HTMLCanvasElement;
@@ -92,6 +98,35 @@ export function ImageColorPanel({ onPick, labels }: ImageColorPanelProps) {
   }, [hasImage, zoom]);
 
   useEffect(() => () => clearImage(), []);
+
+  useEffect(() => {
+    if (!demoImageUrl) return;
+    let cancelled = false;
+    async function loadDemo() {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(demoImageUrl!);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const blob = await response.blob();
+        if (cancelled) return;
+        const loaded = await loadImageFromBlob(blob);
+        if (cancelled) {
+          loaded.revoke?.();
+          return;
+        }
+        await applyLoaded(loaded, "demo-sample.png");
+      } catch {
+        if (!cancelled) setError(labels.errorInvalid);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    void loadDemo();
+    return () => {
+      cancelled = true;
+    };
+  }, [demoImageUrl, labels.errorInvalid]);
 
   useEffect(() => {
     async function onPaste(event: ClipboardEvent) {

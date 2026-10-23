@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Center, Loader, Stack, Text } from "@mantine/core";
-import { getVersion } from "@tauri-apps/api/app";
 import { HistoryList } from "@/features/history";
 import {
   prependHistory,
@@ -27,6 +26,13 @@ import {
   saveOnboardingSeen,
   saveSettings,
 } from "@/storage";
+import {
+  buildDemoLoupe,
+  DEMO_ACTIVE,
+  DEMO_HISTORY,
+  type StoreShotId,
+} from "@/storeShots/demoData";
+import { isStoreShotMode } from "@/storeShots/isStoreShot";
 import {
   copyTextToClipboard,
   onColorCaptured,
@@ -59,6 +65,17 @@ import type {
 } from "@/types";
 import { AppShell } from "@/ui";
 
+type SessionTab = "capture" | "equivalences" | "palettes";
+
+async function readAppVersion(): Promise<string> {
+  try {
+    const { getVersion } = await import("@tauri-apps/api/app");
+    return await getVersion();
+  } catch {
+    return "1.1.2";
+  }
+}
+
 type BootState = "loading" | "ready" | "error";
 
 function isEditableTarget(target: EventTarget | null): boolean {
@@ -86,8 +103,11 @@ export function App() {
   const [loupeSample, setLoupeSample] = useState<LoupeUpdate | null>(null);
   const [appVersion, setAppVersion] = useState("1.0.0");
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [sessionTab, setSessionTab] = useState<SessionTab>("capture");
+  const [demoImageUrl, setDemoImageUrl] = useState<string | null>(null);
 
   const locale = settings.locale;
+  const storeShot = isStoreShotMode();
 
   useEffect(() => {
     let cancelled = false;
@@ -100,37 +120,47 @@ export function App() {
             loadSettings(),
             loadHistory(),
             loadOnboardingSeen(),
-            getVersion().catch(() => "1.0.0"),
+            readAppVersion(),
           ]);
 
         if (cancelled) return;
 
-        setSettings(loadedSettings);
-        setHistory(loadedHistory);
+        const settingsForBoot = storeShot
+          ? { ...loadedSettings, locale: "es" as Locale }
+          : loadedSettings;
+        setSettings(settingsForBoot);
         setAppVersion(version);
-        document.documentElement.lang = loadedSettings.locale;
-        await setAlwaysOnTop(loadedSettings.alwaysOnTop);
+        document.documentElement.lang = settingsForBoot.locale;
+        await setAlwaysOnTop(settingsForBoot.alwaysOnTop);
 
         try {
-          const status = await setGlobalShortcut(loadedSettings.shortcut);
+          const status = await setGlobalShortcut(settingsForBoot.shortcut);
           if (cancelled) return;
-          setShortcutLabel(status.shortcut || loadedSettings.shortcut);
+          setShortcutLabel(status.shortcut || settingsForBoot.shortcut);
           setShortcutError(status.error);
         } catch (error) {
           const fallback = await getShortcutStatus();
           if (cancelled) return;
-          setShortcutLabel(fallback.shortcut || loadedSettings.shortcut);
+          setShortcutLabel(fallback.shortcut || settingsForBoot.shortcut);
           setShortcutError(
             fallback.error ??
               (error instanceof Error ? error.message : String(error)),
           );
         }
 
-        if (loadedHistory[0]) {
-          setActiveColor(loadedHistory[0].color);
+        if (storeShot) {
+          setHistory(DEMO_HISTORY);
+          setActiveColor(DEMO_ACTIVE);
+          setShowOnboarding(false);
+          void saveOnboardingSeen(true);
+        } else {
+          setHistory(loadedHistory);
+          if (loadedHistory[0]) {
+            setActiveColor(loadedHistory[0].color);
+          }
+          setShowOnboarding(!onboardingSeen);
         }
 
-        setShowOnboarding(!onboardingSeen);
         setBoot("ready");
       } catch {
         if (!cancelled) {
@@ -143,7 +173,79 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, [bootTick]);
+  }, [bootTick, storeShot]);
+
+  useEffect(() => {
+    if (!storeShot || boot !== "ready") return;
+
+    const applyShot = (shot: StoreShotId) => {
+      setDemoImageUrl(null);
+      setLoupeSample(null);
+      setPicking(false);
+
+      switch (shot) {
+        case "manual":
+          setTab("workspace");
+          setSessionTab("capture");
+          setPickerMode("manual");
+          setActiveColor(DEMO_ACTIVE);
+          break;
+        case "loupe":
+          setTab("workspace");
+          setSessionTab("capture");
+          setPickerMode("eyedropper");
+          setPicking(true);
+          setLoupeSample(buildDemoLoupe(DEMO_ACTIVE.hex));
+          setActiveColor(DEMO_ACTIVE);
+          break;
+        case "image":
+          setTab("workspace");
+          setSessionTab("capture");
+          setPickerMode("image");
+          setDemoImageUrl(`${import.meta.env.BASE_URL}store-demo-image.png`);
+          break;
+        case "history":
+          setTab("history");
+          break;
+        case "palettes":
+          setTab("workspace");
+          setSessionTab("palettes");
+          setActiveColor(DEMO_ACTIVE);
+          break;
+        case "systems":
+          setTab("workspace");
+          setSessionTab("equivalences");
+          setActiveColor(DEMO_ACTIVE);
+          break;
+        case "settings":
+          setTab("settings");
+          break;
+        default:
+          break;
+      }
+
+      document.documentElement.dataset.storeShot = shot;
+      document.documentElement.dataset.storeShotReady = "1";
+    };
+
+    const onCommand = (event: Event) => {
+      const detail = (event as CustomEvent<{ shot?: StoreShotId }>).detail;
+      if (detail?.shot) applyShot(detail.shot);
+    };
+
+    window.addEventListener("bk-apply-store-shot", onCommand);
+    (
+      window as unknown as { __bkApplyStoreShot?: (shot: StoreShotId) => void }
+    ).__bkApplyStoreShot = applyShot;
+    document.documentElement.dataset.storeShotReady = "1";
+
+    return () => {
+      window.removeEventListener("bk-apply-store-shot", onCommand);
+      delete (
+        window as unknown as { __bkApplyStoreShot?: (shot: StoreShotId) => void }
+      ).__bkApplyStoreShot;
+    };
+  }, [boot, storeShot]);
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -552,6 +654,9 @@ export function App() {
             picking={picking}
             loupeSample={loupeSample}
             history={history}
+            sessionTab={storeShot ? sessionTab : undefined}
+            onSessionTabChange={storeShot ? setSessionTab : undefined}
+            demoImageUrl={demoImageUrl}
             onColorChange={setActiveColor}
             onFormatChange={(format) => void handleFormatChange(format)}
             onCopy={handleCopy}

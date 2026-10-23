@@ -1,4 +1,3 @@
-import { load } from "@tauri-apps/plugin-store";
 import { DEFAULT_COLOR } from "@/lib/color";
 import { DEFAULT_SHORTCUT, HISTORY_LIMIT, STORE_FILE } from "@/lib/constants";
 import type { AppSettings, Color, ColorFormat, HistoryItem, Locale } from "@/types";
@@ -6,6 +5,12 @@ import type { AppSettings, Color, ColorFormat, HistoryItem, Locale } from "@/typ
 const HISTORY_KEY = "history";
 const SETTINGS_KEY = "settings";
 const ONBOARDING_KEY = "onboardingSeen";
+
+const browserMemory = new Map<string, unknown>();
+
+function isTauri(): boolean {
+  return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+}
 
 export const DEFAULT_SETTINGS: AppSettings = {
   locale: "es",
@@ -100,11 +105,15 @@ function parseHistory(value: unknown): HistoryItem[] {
 }
 
 async function getStore() {
+  const { load } = await import("@tauri-apps/plugin-store");
   return load(STORE_FILE, { autoSave: true });
 }
 
 export async function loadSettings(): Promise<AppSettings> {
   try {
+    if (!isTauri()) {
+      return parseSettings(browserMemory.get(SETTINGS_KEY));
+    }
     const store = await getStore();
     const value = await store.get<unknown>(SETTINGS_KEY);
     return parseSettings(value);
@@ -114,13 +123,24 @@ export async function loadSettings(): Promise<AppSettings> {
 }
 
 export async function saveSettings(settings: AppSettings): Promise<void> {
-  const store = await getStore();
-  await store.set(SETTINGS_KEY, settings);
-  await store.save();
+  try {
+    if (!isTauri()) {
+      browserMemory.set(SETTINGS_KEY, settings);
+      return;
+    }
+    const store = await getStore();
+    await store.set(SETTINGS_KEY, settings);
+    await store.save();
+  } catch {
+    // Preview / Store-shot mode: ignore persistence failures.
+  }
 }
 
 export async function loadHistory(): Promise<HistoryItem[]> {
   try {
+    if (!isTauri()) {
+      return parseHistory(browserMemory.get(HISTORY_KEY));
+    }
     const store = await getStore();
     const value = await store.get<unknown>(HISTORY_KEY);
     return parseHistory(value);
@@ -130,13 +150,24 @@ export async function loadHistory(): Promise<HistoryItem[]> {
 }
 
 export async function saveHistory(items: HistoryItem[]): Promise<void> {
-  const store = await getStore();
-  await store.set(HISTORY_KEY, items);
-  await store.save();
+  try {
+    if (!isTauri()) {
+      browserMemory.set(HISTORY_KEY, items);
+      return;
+    }
+    const store = await getStore();
+    await store.set(HISTORY_KEY, items);
+    await store.save();
+  } catch {
+    // Preview / Store-shot mode: ignore persistence failures.
+  }
 }
 
 export async function loadOnboardingSeen(): Promise<boolean> {
   try {
+    if (!isTauri()) {
+      return browserMemory.get(ONBOARDING_KEY) === true;
+    }
     const store = await getStore();
     const value = await store.get<unknown>(ONBOARDING_KEY);
     return value === true;
@@ -146,9 +177,17 @@ export async function loadOnboardingSeen(): Promise<boolean> {
 }
 
 export async function saveOnboardingSeen(seen = true): Promise<void> {
-  const store = await getStore();
-  await store.set(ONBOARDING_KEY, seen);
-  await store.save();
+  try {
+    if (!isTauri()) {
+      browserMemory.set(ONBOARDING_KEY, seen);
+      return;
+    }
+    const store = await getStore();
+    await store.set(ONBOARDING_KEY, seen);
+    await store.save();
+  } catch {
+    // Preview / Store-shot mode: ignore persistence failures.
+  }
 }
 
 export function createHistoryItem(color: Color, favorite = false): HistoryItem {
